@@ -1,0 +1,242 @@
+function handler(params) {
+          params.data.headers['x-fastn-space-connection-id'] = params.data.var.connectionId;
+
+          const flatSchema = params.data?.steps.flattenSchemaForCreateOrder?.output?.schema || {};
+          const data = params.data?.steps.getCin7SaleDetails?.output || {};
+          const shipping = params.data?.steps.determineShippingCountry?.output;
+          const products = params.data?.steps?.GetAllProducts?.output?.data || [];
+          let warehouseId = params.data?.var.mappedWarehouse;
+
+          const ensureTimezone = (datetime) => {
+          if (!datetime) return null;
+          // Check if datetime already has timezone (Z or +/- offset)
+          if (datetime.endsWith('Z') || /[+-]\d{2}:\d{2}$/.test(datetime)) {
+              return datetime;
+          }
+          // Append 'Z' for UTC timezone
+          return datetime + 'Z';
+      };
+          // Helper function to parse DisplayAddressLine2 format: "City State/Region Zip/Postcode Country"
+          const parseDisplayAddressLine2 = (displayLine) => {
+            if (!displayLine) return {};
+
+            const parts = displayLine.trim().split(/\s+/);
+            if (parts.length < 2) return {};
+
+            // Try to extract components (working backwards from the end)
+            // Common formats: "Melbourne VIC 3000 Australia", "New York NY 10001 USA"
+            let country = '';
+            let postalCode = '';
+            let state = '';
+            let city = '';
+
+            let idx = parts.length - 1;
+
+            // Last part is usually country
+            if (idx >= 0) {
+              country = parts[idx];
+              idx--;
+            }
+
+            // Check if second-to-last could be part of country (e.g., "New Zealand")
+            if (idx >= 0 && parts[idx].length > 2 && !/^\d/.test(parts[idx]) && parts[idx].length < 8) {
+              // Could be multi-word country, but more likely a long state name
+              // Let's treat single uppercase short strings as state codes
+            }
+
+            // Postal code (usually numeric or alphanumeric, 3-6 chars)
+            if (idx >= 0 && /^[A-Z0-9]{3,10}$/i.test(parts[idx])) {
+              postalCode = parts[idx];
+              idx--;
+            }
+
+            // State (usually 2-3 letter code or short word)
+            if (idx >= 0 && parts[idx].length <= 4) {
+              state = parts[idx];
+              idx--;
+            }
+
+            // Everything else is city
+            if (idx >= 0) {
+              city = parts.slice(0, idx + 1).join(' ');
+            }
+
+            return { city, state, postalCode, country };
+          };
+
+          // Convert flat schema to nested structure
+          const unflattenSchema = (flatObj) => {
+            const result = {};
+
+            for (const key in flatObj) {
+              const parts = key.split('.');
+              let current = result;
+
+              for (let i = 0; i < parts.length; i++) {
+                const part = parts[i];
+
+                if (i === parts.length - 1) {
+                  // Last part - set the value
+                  current[part] = flatObj[key];
+                } else {
+                  // Intermediate part - create object if doesn't exist
+                  if (!current[part]) {
+                    current[part] = {};
+                  }
+                  current = current[part];
+                }
+              }
+            }
+
+            return result;
+          };
+
+          const schema = unflattenSchema(flatSchema);
+
+          // Helper to check if a field path is in the schema (use schema, not flatSchema!)
+          const isFieldInSchema = (path) => {
+            return schema.hasOwnProperty(path);
+          };
+
+          // Parse shipping address components from DisplayAddressLine2 if needed
+          const shippingParsed = parseDisplayAddressLine2(data?.ShippingAddress?.DisplayAddressLine2);
+          const billingParsed = parseDisplayAddressLine2(data?.BillingAddress?.DisplayAddressLine2);
+
+          // Determine which shipping/carrier method fields to include based on schema
+          const carrierValue = data?.Carrier;
+          const carrierIdValue = data?.CarrierID;
+          const hasCarrierValue = carrierValue && carrierValue !== "N/A";
+
+          // Check what fields exist in schema
+          const hasCarrierName = isFieldInSchema('carrier_name');
+          const hasCarrier = isFieldInSchema('carrier');
+          const hasCarrierId = isFieldInSchema('carrier_id');
+          const hasShippingMethodName = isFieldInSchema('shipping_method_name');
+          const hasShippingMethod = isFieldInSchema('shipping_method');
+          const hasShippingMethodId = isFieldInSchema('shipping_method_id');
+
+          let shippingMethodFields = {};
+
+          // Handle carrier_name vs carrier vs carrier_id
+          if (hasCarrierName) {
+            shippingMethodFields.carrier_name = carrierValue || "N/A";
+          } else if (hasCarrier) {
+            shippingMethodFields.carrier = carrierValue || "N/A";
+            if (!hasCarrierValue && hasCarrierId) {
+              shippingMethodFields.carrier_id = carrierIdValue || "N/A";
+            }
+          } else if (hasCarrierId) {
+            shippingMethodFields.carrier_id = carrierIdValue || "N/A";
+          }
+
+          // Handle shipping_method_name vs shipping_method vs shipping_method_id
+          if (hasShippingMethodName) {
+            shippingMethodFields.shipping_method_name = carrierValue || "N/A";
+          } else if (hasShippingMethod) {
+            shippingMethodFields.shipping_method = carrierValue || "N/A";
+            if (!hasCarrierValue && hasShippingMethodId) {
+              shippingMethodFields.shipping_method_id = carrierIdValue || "N/A";
+            }
+          } else if (hasShippingMethodId) {
+            shippingMethodFields.shipping_method_id = carrierIdValue || "N/A";
+          }
+
+          const sourceData = {
+            warehouse_id: warehouseId,
+            reference_id: params.data?.var.saleId,
+            order_number: data?.Order?.SaleOrderNumber,
+            order_date: ensureTimezone(data?.SaleOrderDate),
+            purchase_order_number: data?.CustomerReference || data?.Order?.SaleOrderNumber || "",  // Fallback to order number
+            trackstar_tags: [data?.Order?.SaleOrderNumber, `cin7_id:${params.data?.var.saleId}`].filter(Boolean),  // Array of tags
+            ...shippingMethodFields,  // Spread the determined shipping/carrier method fields
+            ship_to_address: {
+              full_name: data?.Customer,
+              address1: data?.ShippingAddress?.Line1 || data?.ShippingAddress?.DisplayAddressLine1,
+              address2: data?.ShippingAddress?.Line2,
+              city: data?.ShippingAddress?.City || shippingParsed.city,
+              state: data?.ShippingAddress?.State || shippingParsed.state,
+              postal_code: data?.ShippingAddress?.Postcode || shippingParsed.postalCode,
+              company: data?.ShippingAddress?.Company || data?.Customer,
+              country: data?.ShippingAddress?.Country || shippingParsed.country || shipping?.country || "Australia",
+              phone_number: data?.Phone,
+            },
+            bill_to_address: {
+              full_name: data?.Customer,
+              address1: data?.BillingAddress?.Line1 || data?.BillingAddress?.DisplayAddressLine1,
+              address2: data?.BillingAddress?.Line2,
+              city: data?.BillingAddress?.City || billingParsed.city,
+              state: data?.BillingAddress?.State || billingParsed.state,
+              postal_code: data?.BillingAddress?.Postcode || billingParsed.postalCode,
+              company: data?.BillingAddress?.Company || data?.Customer,
+              country: data?.BillingAddress?.Country || billingParsed.country || shipping?.country || "Australia",
+              phone_number: data?.Phone,
+            },
+            line_items: (data?.Order?.Lines || []).map(line => {
+              const productMatch = products.find(p => p.sku === line.SKU);
+              return {
+                sku: line.SKU,
+                quantity: line.Quantity,
+                unit_price: line.Price,
+                product_id: productMatch?.id || null,
+                tax: line.Tax || 0,
+              };
+            }),
+          };
+
+        const fillFromSchema = (schemaObj, dataObj, parentPath = '') => {
+            const result = {};
+
+            for (const key in schemaObj) {
+              const schemaVal = schemaObj[key];
+              const dataVal = dataObj?.[key];
+              const currentPath = parentPath ? `${parentPath}.${key}` : key;
+
+              // Handle line_items array
+              if (key === "line_items") {
+                if (Array.isArray(dataVal) && dataVal.length > 0) {
+                  const lineSchema = schemaObj[key];
+                  const items = dataVal.map(item => fillFromSchema(lineSchema, item, currentPath));
+                  if (items.length > 0) result[key] = items;
+                }
+                continue;
+              }
+
+              // Handle nested objects
+              if (typeof schemaVal === "object" && !Array.isArray(schemaVal)) {
+                const nested = fillFromSchema(schemaVal, dataVal || {}, currentPath);
+
+                // Include if it has content OR if the parent path itself is required
+                if (Object.keys(nested).length > 0 || isFieldInSchema(currentPath)) {
+                  result[key] = nested;
+                }
+                continue;
+              }
+
+              // Handle primitive values
+              const fieldExistsInData = dataObj?.hasOwnProperty(key);
+              const hasValue = dataVal !== undefined &&
+                              dataVal !== null &&
+                              dataVal !== "" &&
+                              !(Array.isArray(dataVal) && dataVal.length === 0);
+
+              // Exception: Skip address2 if it has no value
+              const isOptionalEmptyField = key === 'address2' && !hasValue;
+
+              if (hasValue) {
+                // Always include fields with actual values
+                result[key] = dataVal;
+              } else if (fieldExistsInData && !isOptionalEmptyField) {
+                // Only include empty fields if they were explicitly set in sourceData
+                // and are not optional fields like address2
+                result[key] = dataVal ?? "";
+              }
+              // If field doesn't exist in sourceData or is an optional empty field, skip it
+            }
+
+            return result;
+          };
+
+          const body = fillFromSchema(schema, sourceData);
+
+          return { body };
+        }
