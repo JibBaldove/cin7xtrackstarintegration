@@ -44,10 +44,25 @@ function handler(params) {
               // Let's treat single uppercase short strings as state codes
             }
 
-            // Postal code (usually numeric or alphanumeric, 3-6 chars)
-            if (idx >= 0 && /^[A-Z0-9]{3,10}$/i.test(parts[idx])) {
-              postalCode = parts[idx];
-              idx--;
+            // Check for split CANADIAN postal codes first: "A1A 1A1" format
+            if (idx >= 1 &&
+                /^[A-Z0-9]{3}$/i.test(parts[idx]) &&           // "1J0"
+                /^[A-Z][0-9][A-Z]$/i.test(parts[idx-1])) {     // "G0G"
+                // Canadian format: combine both parts
+                postalCode = parts[idx-1] + ' ' + parts[idx];
+                idx -= 2;
+            }
+            // Check for split UK postal codes: "SW1A 1AA" format
+            else if (idx >= 1 &&
+                /^[0-9][A-Z]{2}$/i.test(parts[idx]) &&         // "1AA"
+                /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?$/i.test(parts[idx-1])) {  // "SW1A"
+                postalCode = parts[idx-1] + ' ' + parts[idx];
+                idx -= 2;
+            }
+            // Single-part postal codes (US, AU, etc)
+            else if (idx >= 0 && /^[A-Z0-9]{3,10}$/i.test(parts[idx])) {
+                postalCode = parts[idx];
+                idx--;
             }
 
             // State (usually 2-3 letter code or short word)
@@ -141,6 +156,11 @@ function handler(params) {
             shippingMethodFields.shipping_method_id = carrierIdValue || "N/A";
           }
 
+          // Collect all authorised pick lines from fulfillments
+          const authorisedPickLines = (data?.Fulfilments || [])
+            .filter(fulfillment => fulfillment?.Pick?.Status === "AUTHORISED")
+            .flatMap(fulfillment => fulfillment?.Pick?.Lines || []);
+
           const sourceData = {
             warehouse_id: warehouseId,
             reference_id: params.data?.var.saleId,
@@ -171,14 +191,20 @@ function handler(params) {
               country: data?.BillingAddress?.Country || billingParsed.country || shipping?.country || "Australia",
               phone_number: data?.Phone,
             },
-            line_items: (data?.Order?.Lines || []).map(line => {
-              const productMatch = products.find(p => p.sku === line.SKU);
+            line_items: authorisedPickLines.map(pickLine => {
+              // Find matching order line for pricing info
+              const orderLine = (data?.Order?.Lines || []).find(
+                line => line.SKU === pickLine.SKU || line.ProductID === pickLine.ProductID
+              );
+
+              const productMatch = products.find(p => p.sku === pickLine.SKU);
+
               return {
-                sku: line.SKU,
-                quantity: line.Quantity,
-                unit_price: line.Price,
+                sku: pickLine.SKU,
+                quantity: pickLine.Quantity,  // Use picked quantity from AUTHORISED fulfillments
+                unit_price: orderLine?.Price || 0,
                 product_id: productMatch?.id || null,
-                tax: line.Tax || 0,
+                tax: orderLine?.Tax || 0,
               };
             }),
           };
