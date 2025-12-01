@@ -5,7 +5,31 @@ function handler(params) {
           const data = params.data?.steps.getCin7SaleDetails?.output || {};
           const shipping = params.data?.steps.determineShippingCountry?.output;
           const products = params.data?.steps?.GetAllProducts?.output?.data || [];
+          const tenantConfig = params.data?.var.tenantConfig || {};
+          const connectionId = params.data.var.connectionId;
           let warehouseId = params.data?.var.mappedWarehouse;
+
+          // Find substitutionList for current connection
+          const locationMapping = tenantConfig.locationMapping || [];
+          const currentConnection = locationMapping.find(mapping => mapping.connectionId === connectionId);
+          const substitutionList = currentConnection?.substitutionList || [];
+
+          // Helper function to apply substitutions from the substitutionList
+          const applySubstitution = (value, listName) => {
+              if (!value || !substitutionList || !Array.isArray(substitutionList)) {
+                  return value;
+              }
+
+              // Find the substitution list that matches the listName
+              const substitution = substitutionList.find(sub => sub.listName === listName);
+
+              if (!substitution || !substitution.mapping) {
+                  return value;
+              }
+
+              // Return mapped value if it exists, otherwise return original value
+              return substitution.mapping[value] || value;
+          };
 
           const ensureTimezone = (datetime) => {
           if (!datetime) return null;
@@ -196,7 +220,10 @@ function handler(params) {
               state: data?.ShippingAddress?.State || shippingParsed.state,
               postal_code: data?.ShippingAddress?.Postcode || shippingParsed.postalCode,
               company: data?.ShippingAddress?.Company || data?.Customer,
-              country: data?.ShippingAddress?.Country || shippingParsed.country || shipping?.country || "Australia",
+              country: applySubstitution(
+                  data?.ShippingAddress?.Country || shippingParsed.country || shipping?.country || "Australia",
+                  "country"
+              ),
               phone_number: data?.Phone,
             },
             bill_to_address: {
@@ -207,7 +234,10 @@ function handler(params) {
               state: data?.BillingAddress?.State || billingParsed.state,
               postal_code: data?.BillingAddress?.Postcode || billingParsed.postalCode,
               company: data?.BillingAddress?.Company || data?.Customer,
-              country: data?.BillingAddress?.Country || billingParsed.country || shipping?.country || "Australia",
+              country: applySubstitution(
+                  data?.BillingAddress?.Country || billingParsed.country || shipping?.country || "Australia",
+                  "country"
+              ),
               phone_number: data?.Phone,
             },
             line_items: combinedPickLines.map(item => {
