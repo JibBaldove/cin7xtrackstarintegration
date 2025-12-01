@@ -53,8 +53,28 @@
         return existingApiKeyHeader.Value !== apiKey;
       };
 
+      // Flatten clientWebhooks to handle webhook as array or object
+      const flattenedWebhooks = [];
+      clientWebhooks.forEach(config => {
+        // Skip if webhook is not defined or empty
+        if (!config.webhook) {
+          return;
+        }
+
+        // Handle both array and object formats
+        const webhooks = Array.isArray(config.webhook) ? config.webhook : [config.webhook];
+
+        // Filter out null/undefined webhooks and process valid ones
+        webhooks.filter(webhook => webhook).forEach(webhook => {
+          flattenedWebhooks.push({
+            entity: config.entity,
+            webhook: webhook
+          });
+        });
+      });
+
       // Process each client webhook
-      clientWebhooks.forEach(clientWebhook => {
+      flattenedWebhooks.forEach(clientWebhook => {
         const webhookUrl = clientWebhook.webhook.url;
         const webhookEvent = clientWebhook.webhook.event;
         const webhookStatus = clientWebhook.webhook.status;
