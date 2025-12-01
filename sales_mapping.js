@@ -156,19 +156,38 @@ function handler(params) {
             shippingMethodFields.shipping_method_id = carrierIdValue || "N/A";
           }
 
-          // Collect all authorised pick lines from fulfillments
-          const authorisedPickLines = (data?.Fulfilments || [])
-            .filter(fulfillment => fulfillment?.Pick?.Status === "AUTHORISED")
-            .flatMap(fulfillment => fulfillment?.Pick?.Lines || []);
+          // Get current fulfillment from loop
+          const currentFulfillment = params.data?.steps?.loopOverOrderFulfillments?.loopOverItem;
+
+          // Get pick lines from current fulfillment only
+          const pickLines = currentFulfillment?.Pick?.Lines || [];
+
+          // Combine quantities for same SKU (in case picked from different locations)
+          const skuQuantityMap = {};
+          pickLines.forEach(pickLine => {
+            const sku = pickLine.SKU;
+            if (skuQuantityMap[sku]) {
+              skuQuantityMap[sku].quantity += pickLine.Quantity;
+            } else {
+              skuQuantityMap[sku] = {
+                sku: sku,
+                quantity: pickLine.Quantity,
+                productId: pickLine.ProductID
+              };
+            }
+          });
+
+          // Convert map to array of line items
+          const combinedPickLines = Object.values(skuQuantityMap);
 
           const sourceData = {
             warehouse_id: warehouseId,
-            reference_id: params.data?.var.saleId,
+            reference_id: params.data?.steps.generateSaleReferences.output.cin7Id,
             order_number: data?.Order?.SaleOrderNumber,
             order_date: ensureTimezone(data?.SaleOrderDate),
-            purchase_order_number: data?.CustomerReference || data?.Order?.SaleOrderNumber || "",  // Fallback to order number
-            trackstar_tags: [data?.Order?.SaleOrderNumber, `cin7_id:${params.data?.var.saleId}`].filter(Boolean),  // Array of tags
-            ...shippingMethodFields,  // Spread the determined shipping/carrier method fields
+            purchase_order_number: params.data?.steps.generateSaleReferences.output.cin7Key,
+            trackstar_tags: [data?.Order?.SaleOrderNumber, `cin7_id:${params.data?.steps.generateSaleReferences.output.cin7Id}`].filter(Boolean),
+            ...shippingMethodFields,
             ship_to_address: {
               full_name: data?.Customer,
               address1: data?.ShippingAddress?.Line1 || data?.ShippingAddress?.DisplayAddressLine1,
@@ -191,17 +210,16 @@ function handler(params) {
               country: data?.BillingAddress?.Country || billingParsed.country || shipping?.country || "Australia",
               phone_number: data?.Phone,
             },
-            line_items: authorisedPickLines.map(pickLine => {
-              // Find matching order line for pricing info
+            line_items: combinedPickLines.map(item => {
               const orderLine = (data?.Order?.Lines || []).find(
-                line => line.SKU === pickLine.SKU || line.ProductID === pickLine.ProductID
+                line => line.SKU === item.sku || line.ProductID === item.productId
               );
 
-              const productMatch = products.find(p => p.sku === pickLine.SKU);
+              const productMatch = products.find(p => p.sku === item.sku);
 
               return {
-                sku: pickLine.SKU,
-                quantity: pickLine.Quantity,  // Use picked quantity from AUTHORISED fulfillments
+                sku: item.sku,
+                quantity: item.quantity,
                 unit_price: orderLine?.Price || 0,
                 product_id: productMatch?.id || null,
                 tax: orderLine?.Tax || 0,
