@@ -269,7 +269,14 @@ function handler(params) {
               if (key === "line_items") {
                 if (Array.isArray(dataVal) && dataVal.length > 0) {
                   const lineSchema = schemaObj[key];
-                  const items = dataVal.map(item => fillFromSchema(lineSchema, item, currentPath));
+                  const items = dataVal.map(item => {
+                    const filteredItem = fillFromSchema(lineSchema, item, currentPath);
+                    // For dear-systems, always preserve tax field even if not in schema
+                    if (params.data?.var?.integrationName === 'dear-systems' && item.hasOwnProperty('tax')) {
+                      filteredItem.tax = item.tax;
+                    }
+                    return filteredItem;
+                  });
                   if (items.length > 0) result[key] = items;
                 }
                 continue;
