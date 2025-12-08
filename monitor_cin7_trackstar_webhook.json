@@ -1,0 +1,2144 @@
+[
+  {
+    "clientId": "d0f8c7f3-69d3-403c-90a0-17c8857e095f",
+    "id": "monitor_cin7_trackstar_webhook",
+    "newName": null,
+    "name": "monitor_cin7_trackstar_webhook",
+    "description": "This is for publishing Webhooks in Cin7 that is used to sync entities in Trackstar. This is defined in Tenants config, under syncConfig object in table tenantConfig",
+    "actionType": "CREATE",
+    "inputName": "input",
+    "inputModelId": "json",
+    "chatWelcomeMessage": null,
+    "outputModelId": "json",
+    "errorModelId": "",
+    "headerModelId": "json",
+    "apiPreview": {
+      "graphql": null,
+      "rest": {
+        "schema": "{\"openapi\":\"3.0.3\",\"info\":{\"title\":\"Flow OpenAPI Specification\",\"description\":\"OpenAPI specification for the flow\",\"version\":\"1.0.11\"},\"servers\":[{\"url\":\"https://live.fastn.ai/api/v1\"}],\"paths\":{\"/monitor_cin7_trackstar_webhook\":{\"post\":{\"summary\":\"monitor_cin7_trackstar_webhook\",\"operationId\":\"POST-monitor_cin7_trackstar_webhook\",\"parameters\":[{\"in\":\"header\",\"name\":\"x-fastn-space-id\",\"description\":\"x-fastn-space-id Header\",\"schema\":{\"type\":\"string\",\"default\":\"d0f8c7f3-69d3-403c-90a0-17c8857e095f\"},\"required\":false},{\"in\":\"header\",\"name\":\"stage\",\"description\":\"stage Header\",\"schema\":{\"type\":\"string\",\"default\":\"DRAFT\"},\"required\":false},{\"in\":\"header\",\"name\":\"content-type\",\"description\":\"content-type Header\",\"schema\":{\"type\":\"string\",\"default\":\"application/json\"},\"required\":false},{\"in\":\"header\",\"name\":\"x-fastn-space-tenantid\",\"description\":\"x-fastn-space-tenantid Header\",\"schema\":{\"type\":\"string\",\"default\":\"\"},\"required\":false}],\"requestBody\":{\"required\":true,\"content\":{\"application/json\":{\"schema\":{\"properties\":{\"input\":{\"properties\":{},\"type\":\"object\",\"description\":\"Free form JSON\",\"title\":\"JSON\"}},\"type\":\"object\"}}}},\"responses\":{\"200\":{\"description\":\"Success\",\"content\":{\"application/json\":{\"schema\":{\"properties\":{},\"type\":\"object\",\"description\":\"Free form JSON\",\"title\":\"JSON\"}}}}},\"security\":[{\"apiKey\":[]}]}}},\"components\":{\"securitySchemes\":{\"apiKey\":{\"type\":\"apiKey\",\"in\":\"header\",\"name\":\"x-fastn-api-key\"},\"bearerAuth\":{\"scheme\":\"bearer\",\"type\":\"http\"}}}}"
+      }
+    },
+    "version": null,
+    "inputModel": {
+      "createdAt": 1764236002.4694743,
+      "updatedAt": 1764236002.469435,
+      "id": "json",
+      "clientId": "d0f8c7f3-69d3-403c-90a0-17c8857e095f",
+      "name": "Json",
+      "type": null,
+      "version": "1.0",
+      "preview": null,
+      "jsonSchema": {
+        "properties": {},
+        "type": "object",
+        "description": "Free form JSON",
+        "title": "JSON",
+        "required": []
+      },
+      "uiSchema": null,
+      "isReadOnly": true,
+      "imageUrl": null,
+      "groupId": null,
+      "resourceType": null,
+      "deleted": false,
+      "isCommunityCreated": false,
+      "dataModel": {
+        "properties": {},
+        "type": "object",
+        "description": "Free form JSON",
+        "title": "JSON",
+        "required": []
+      }
+    },
+    "outputModel": {
+      "createdAt": 1764236002.4694743,
+      "updatedAt": 1764236002.469435,
+      "id": "json",
+      "clientId": "d0f8c7f3-69d3-403c-90a0-17c8857e095f",
+      "name": "Json",
+      "type": null,
+      "version": "1.0",
+      "preview": null,
+      "jsonSchema": {
+        "properties": {},
+        "type": "object",
+        "description": "Free form JSON",
+        "title": "JSON",
+        "required": []
+      },
+      "uiSchema": null,
+      "isReadOnly": true,
+      "imageUrl": null,
+      "groupId": null,
+      "resourceType": null,
+      "deleted": false,
+      "isCommunityCreated": false,
+      "dataModel": {
+        "properties": {},
+        "type": "object",
+        "description": "Free form JSON",
+        "title": "JSON",
+        "required": []
+      }
+    },
+    "errorModel": null,
+    "headerModel": {
+      "createdAt": 1764236002.4694743,
+      "updatedAt": 1764236002.469435,
+      "id": "json",
+      "clientId": "d0f8c7f3-69d3-403c-90a0-17c8857e095f",
+      "name": "Json",
+      "type": null,
+      "version": "1.0",
+      "preview": null,
+      "jsonSchema": {
+        "properties": {},
+        "type": "object",
+        "description": "Free form JSON",
+        "title": "JSON",
+        "required": []
+      },
+      "uiSchema": null,
+      "isReadOnly": true,
+      "imageUrl": null,
+      "groupId": null,
+      "resourceType": null,
+      "deleted": false,
+      "isCommunityCreated": false,
+      "dataModel": {
+        "properties": {},
+        "type": "object",
+        "description": "Free form JSON",
+        "title": "JSON",
+        "required": []
+      }
+    },
+    "status": "CONNECT",
+    "createdAt": 1764923806.5673218,
+    "updatedAt": 1764924158.114695,
+    "deployedAt": 1764569822.0261548,
+    "resolver": {
+      "id": "publish_cin7_trackstar_webhook",
+      "label": null,
+      "clientId": "d0f8c7f3-69d3-403c-90a0-17c8857e095f",
+      "groupId": null,
+      "type": null,
+      "field": null,
+      "dependencies": null,
+      "start": "SelectTenantConfig",
+      "nodeBased": false,
+      "steps": [
+        {
+          "type": "INTERNAL_DB",
+          "id": "SelectTenantConfig",
+          "actionId": null,
+          "inline": null,
+          "function": null,
+          "composite": null,
+          "loop": null,
+          "internalDatabase": {
+            "next": "Variable5298",
+            "query": "SELECT config\nFROM \"tbl_cin7_trackstar_tenant_config\"\nWHERE tenant_id = ?;\n",
+            "code": "\n[\n{\n  \"type\" : \"string\",\n  \"value\" : {{data.headers['x-fastn-space-tenantid'] | tojson}}\n}\n\n]",
+            "dbQueryParams": [
+              {
+                "type": "string",
+                "value": "{{data.headers['x-fastn-space-tenantid']}}"
+              }
+            ],
+            "queryExecutor": {
+              "children": [],
+              "returnLiteral": true,
+              "symbolOrIndex": {
+                "type": "null",
+                "value": null
+              },
+              "version": 2
+            }
+          },
+          "aiAction": null,
+          "mcpClient": null,
+          "logger": null,
+          "downLoadFile": null,
+          "endLoop": null,
+          "trigger": null,
+          "converter": null,
+          "variables": null,
+          "state": null,
+          "conditional": null,
+          "lambdaFunction": null,
+          "outputSchema": null,
+          "next": "Variable5298",
+          "prevStep": null,
+          "enableDebug": false,
+          "description": null,
+          "debugBreakAfter": 1,
+          "configuredStepSetting": null,
+          "filter": null,
+          "limit": null,
+          "splitOut": null,
+          "aggregate": null,
+          "merge": null,
+          "aiAgent": null,
+          "settings": {
+            "failureBehavior": "FAILURE",
+            "skipStatus": null,
+            "errorMessage": null,
+            "stepNote": null
+          },
+          "ftp": null,
+          "summarizationChain": null,
+          "textClassifier": null,
+          "warnings": null,
+          "tenantSettings": null
+        },
+        {
+          "type": "VARIABLE",
+          "id": "Variable5298",
+          "actionId": null,
+          "inline": null,
+          "function": null,
+          "composite": null,
+          "loop": null,
+          "internalDatabase": null,
+          "aiAction": null,
+          "mcpClient": null,
+          "logger": null,
+          "downLoadFile": null,
+          "endLoop": null,
+          "trigger": null,
+          "converter": null,
+          "variables": {
+            "next": "loopOverTenants",
+            "variables": [],
+            "code": "\n{\n  \"tenantConfig\": {% if data.steps.SelectTenantConfig.output[0].config.value %}{{data.steps.SelectTenantConfig.output[0].config.value| shape}}{% else %}\"\"{% endif %}\n}",
+            "uiCode": "{\"actionType\":\"map\",\"target\":{\"tenantConfig\":{\"actionType\":\"map\",\"target\":\"{{data.steps.SelectTenantConfig.output[0].config.value}}\",\"targetType\":\"object\",\"actions\":[],\"default\":\"\",\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"selected\":false,\"autoEscape\":\"AUTO\",\"byUser\":true}},\"targetType\":\"object\",\"actions\":[],\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"default\":[]}",
+            "queryExecutor": {
+              "children": [
+                {
+                  "key": {
+                    "type": "java.lang.String",
+                    "value": "data"
+                  },
+                  "value": {
+                    "children": [
+                      {
+                        "key": {
+                          "type": "java.lang.String",
+                          "value": "steps"
+                        },
+                        "value": {
+                          "children": [
+                            {
+                              "key": {
+                                "type": "java.lang.String",
+                                "value": "SelectTenantConfig"
+                              },
+                              "value": {
+                                "children": [
+                                  {
+                                    "key": {
+                                      "type": "java.lang.String",
+                                      "value": "output"
+                                    },
+                                    "value": {
+                                      "children": [
+                                        {
+                                          "key": {
+                                            "type": "java.math.BigInteger",
+                                            "value": "0"
+                                          },
+                                          "value": {
+                                            "children": [
+                                              {
+                                                "key": {
+                                                  "type": "java.lang.String",
+                                                  "value": "config"
+                                                },
+                                                "value": {
+                                                  "children": [
+                                                    {
+                                                      "key": {
+                                                        "type": "java.lang.String",
+                                                        "value": "value"
+                                                      },
+                                                      "value": {
+                                                        "children": [],
+                                                        "returnLiteral": true,
+                                                        "symbolOrIndex": {
+                                                          "type": "java.lang.String",
+                                                          "value": "value"
+                                                        },
+                                                        "version": 2
+                                                      }
+                                                    }
+                                                  ],
+                                                  "returnLiteral": false,
+                                                  "symbolOrIndex": {
+                                                    "type": "java.lang.String",
+                                                    "value": "config"
+                                                  },
+                                                  "version": 2
+                                                }
+                                              }
+                                            ],
+                                            "returnLiteral": false,
+                                            "symbolOrIndex": {
+                                              "type": "java.math.BigInteger",
+                                              "value": "0"
+                                            },
+                                            "version": 2
+                                          }
+                                        }
+                                      ],
+                                      "returnLiteral": false,
+                                      "symbolOrIndex": {
+                                        "type": "java.lang.String",
+                                        "value": "output"
+                                      },
+                                      "version": 2
+                                    }
+                                  }
+                                ],
+                                "returnLiteral": false,
+                                "symbolOrIndex": {
+                                  "type": "java.lang.String",
+                                  "value": "SelectTenantConfig"
+                                },
+                                "version": 2
+                              }
+                            }
+                          ],
+                          "returnLiteral": false,
+                          "symbolOrIndex": {
+                            "type": "java.lang.String",
+                            "value": "steps"
+                          },
+                          "version": 2
+                        }
+                      }
+                    ],
+                    "returnLiteral": false,
+                    "symbolOrIndex": {
+                      "type": "java.lang.String",
+                      "value": "data"
+                    },
+                    "version": 2
+                  }
+                }
+              ],
+              "returnLiteral": false,
+              "symbolOrIndex": {
+                "type": "null",
+                "value": null
+              },
+              "version": 2
+            }
+          },
+          "state": null,
+          "conditional": null,
+          "lambdaFunction": null,
+          "outputSchema": null,
+          "next": "loopOverTenants",
+          "prevStep": null,
+          "enableDebug": false,
+          "description": null,
+          "debugBreakAfter": 1,
+          "configuredStepSetting": null,
+          "filter": null,
+          "limit": null,
+          "splitOut": null,
+          "aggregate": null,
+          "merge": null,
+          "aiAgent": null,
+          "settings": {
+            "failureBehavior": "FAILURE",
+            "skipStatus": null,
+            "errorMessage": null,
+            "stepNote": null
+          },
+          "ftp": null,
+          "summarizationChain": null,
+          "textClassifier": null,
+          "warnings": null,
+          "tenantSettings": null
+        },
+        {
+          "type": "LOOP",
+          "id": "loopOverTenants",
+          "actionId": null,
+          "inline": null,
+          "function": null,
+          "composite": null,
+          "loop": {
+            "next": "IfSyncConfigExists",
+            "start": null,
+            "loopOver": " {{data.steps.SelectTenantConfig.output}}",
+            "type": "DATA",
+            "steps": [
+              {
+                "type": "CONDITIONAL",
+                "id": "IfSyncConfigExists",
+                "actionId": null,
+                "inline": null,
+                "function": null,
+                "composite": null,
+                "loop": null,
+                "internalDatabase": null,
+                "aiAction": null,
+                "mcpClient": null,
+                "logger": null,
+                "downLoadFile": null,
+                "endLoop": null,
+                "trigger": null,
+                "converter": null,
+                "variables": null,
+                "state": null,
+                "conditional": {
+                  "id": "IfSyncConfigExists",
+                  "next": null,
+                  "expressions": [
+                    {
+                      "name": "Sync config defined",
+                      "logic": "AND",
+                      "conditions": null,
+                      "variable": "{{data.var.tenantConfig.syncConfig}}",
+                      "value": null,
+                      "operation": "EXISTS",
+                      "next": "Log"
+                    }
+                  ],
+                  "queryExecutor": {
+                    "children": [
+                      {
+                        "key": {
+                          "type": "java.lang.String",
+                          "value": "data"
+                        },
+                        "value": {
+                          "children": [
+                            {
+                              "key": {
+                                "type": "java.lang.String",
+                                "value": "var"
+                              },
+                              "value": {
+                                "children": [
+                                  {
+                                    "key": {
+                                      "type": "java.lang.String",
+                                      "value": "tenantConfig"
+                                    },
+                                    "value": {
+                                      "children": [
+                                        {
+                                          "key": {
+                                            "type": "java.lang.String",
+                                            "value": "syncConfig"
+                                          },
+                                          "value": {
+                                            "children": [],
+                                            "returnLiteral": true,
+                                            "symbolOrIndex": {
+                                              "type": "java.lang.String",
+                                              "value": "syncConfig"
+                                            },
+                                            "version": 2
+                                          }
+                                        }
+                                      ],
+                                      "returnLiteral": false,
+                                      "symbolOrIndex": {
+                                        "type": "java.lang.String",
+                                        "value": "tenantConfig"
+                                      },
+                                      "version": 2
+                                    }
+                                  }
+                                ],
+                                "returnLiteral": false,
+                                "symbolOrIndex": {
+                                  "type": "java.lang.String",
+                                  "value": "var"
+                                },
+                                "version": 2
+                              }
+                            }
+                          ],
+                          "returnLiteral": false,
+                          "symbolOrIndex": {
+                            "type": "java.lang.String",
+                            "value": "data"
+                          },
+                          "version": 2
+                        }
+                      }
+                    ],
+                    "returnLiteral": false,
+                    "symbolOrIndex": {
+                      "type": "null",
+                      "value": null
+                    },
+                    "version": 2
+                  }
+                },
+                "lambdaFunction": null,
+                "outputSchema": null,
+                "next": null,
+                "prevStep": null,
+                "enableDebug": false,
+                "description": null,
+                "debugBreakAfter": 1,
+                "configuredStepSetting": null,
+                "filter": null,
+                "limit": null,
+                "splitOut": null,
+                "aggregate": null,
+                "merge": null,
+                "aiAgent": null,
+                "settings": {
+                  "failureBehavior": "FAILURE",
+                  "skipStatus": null,
+                  "errorMessage": null,
+                  "stepNote": null
+                },
+                "ftp": null,
+                "summarizationChain": null,
+                "textClassifier": null,
+                "warnings": null,
+                "tenantSettings": null
+              },
+              {
+                "type": "LOGGER",
+                "id": "Log",
+                "actionId": null,
+                "inline": null,
+                "function": null,
+                "composite": null,
+                "loop": null,
+                "internalDatabase": null,
+                "aiAction": null,
+                "mcpClient": null,
+                "logger": {
+                  "next": "getWebhooks",
+                  "context": "{{data.var.tenantConfig.syncConfig}}",
+                  "message": null,
+                  "queryExecutor": {
+                    "children": [
+                      {
+                        "key": {
+                          "type": "java.lang.String",
+                          "value": "data"
+                        },
+                        "value": {
+                          "children": [
+                            {
+                              "key": {
+                                "type": "java.lang.String",
+                                "value": "var"
+                              },
+                              "value": {
+                                "children": [
+                                  {
+                                    "key": {
+                                      "type": "java.lang.String",
+                                      "value": "tenantConfig"
+                                    },
+                                    "value": {
+                                      "children": [
+                                        {
+                                          "key": {
+                                            "type": "java.lang.String",
+                                            "value": "syncConfig"
+                                          },
+                                          "value": {
+                                            "children": [],
+                                            "returnLiteral": true,
+                                            "symbolOrIndex": {
+                                              "type": "java.lang.String",
+                                              "value": "syncConfig"
+                                            },
+                                            "version": 2
+                                          }
+                                        }
+                                      ],
+                                      "returnLiteral": false,
+                                      "symbolOrIndex": {
+                                        "type": "java.lang.String",
+                                        "value": "tenantConfig"
+                                      },
+                                      "version": 2
+                                    }
+                                  }
+                                ],
+                                "returnLiteral": false,
+                                "symbolOrIndex": {
+                                  "type": "java.lang.String",
+                                  "value": "var"
+                                },
+                                "version": 2
+                              }
+                            }
+                          ],
+                          "returnLiteral": false,
+                          "symbolOrIndex": {
+                            "type": "java.lang.String",
+                            "value": "data"
+                          },
+                          "version": 2
+                        }
+                      }
+                    ],
+                    "returnLiteral": false,
+                    "symbolOrIndex": {
+                      "type": "null",
+                      "value": null
+                    },
+                    "version": 2
+                  }
+                },
+                "downLoadFile": null,
+                "endLoop": null,
+                "trigger": null,
+                "converter": null,
+                "variables": null,
+                "state": null,
+                "conditional": null,
+                "lambdaFunction": null,
+                "outputSchema": null,
+                "next": "getWebhooks",
+                "prevStep": null,
+                "enableDebug": false,
+                "description": null,
+                "debugBreakAfter": 1,
+                "configuredStepSetting": null,
+                "filter": null,
+                "limit": null,
+                "splitOut": null,
+                "aggregate": null,
+                "merge": null,
+                "aiAgent": null,
+                "settings": {
+                  "failureBehavior": "FAILURE",
+                  "skipStatus": null,
+                  "errorMessage": null,
+                  "stepNote": null
+                },
+                "ftp": null,
+                "summarizationChain": null,
+                "textClassifier": null,
+                "warnings": null,
+                "tenantSettings": null
+              },
+              {
+                "type": "COMPOSITE",
+                "id": "getWebhooks",
+                "actionId": null,
+                "inline": null,
+                "function": null,
+                "composite": {
+                  "steps": [
+                    {
+                      "type": "INLINE",
+                      "id": "getWebhooksMap",
+                      "actionId": null,
+                      "inline": {
+                        "code": "\n{\n  \"body\": {% if $fastn_object_default %}{{$fastn_object_default| shape}}{% else %}{}{% endif %},\n  \"auth\": {\n  \"accountId\": \"\",\n  \"apiKey\": \"\"\n}\n}",
+                        "language": "JINJA",
+                        "fields": [],
+                        "next": "getWebhooksApi",
+                        "uiCode": "{\"actionType\":\"map\",\"target\":{\"body\":{\"path\":\"body\",\"field\":null,\"position\":[\"body\"],\"key\":\"body\",\"selected\":true,\"actionType\":\"map\",\"target\":\"\",\"targetType\":\"object\",\"actions\":[],\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"default\":[]},\"auth\":{\"actionType\":\"map\",\"target\":{\"accountId\":{\"actionType\":\"map\",\"target\":\"\",\"targetType\":\"string\",\"actions\":[],\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"default\":\"\",\"autoEscape\":\"MANUAL\"},\"apiKey\":{\"actionType\":\"map\",\"target\":\"\",\"targetType\":\"string\",\"actions\":[],\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"default\":\"\",\"autoEscape\":\"MANUAL\"}},\"targetType\":\"object\",\"actions\":[],\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"default\":[]}},\"targetType\":\"object\",\"actions\":[],\"default\":[],\"isRequred\":false,\"selected\":false,\"title\":\"\",\"description\":\"\",\"enum\":[]}",
+                        "hasResponse": false,
+                        "isError": false,
+                        "statusCode": 200,
+                        "outputSchema": null,
+                        "queryExecutor": {
+                          "children": [],
+                          "returnLiteral": true,
+                          "symbolOrIndex": {
+                            "type": "null",
+                            "value": null
+                          },
+                          "version": 2
+                        }
+                      },
+                      "function": null,
+                      "composite": null,
+                      "loop": null,
+                      "internalDatabase": null,
+                      "aiAction": null,
+                      "mcpClient": null,
+                      "logger": null,
+                      "downLoadFile": null,
+                      "endLoop": null,
+                      "trigger": null,
+                      "converter": null,
+                      "variables": null,
+                      "state": null,
+                      "conditional": null,
+                      "lambdaFunction": null,
+                      "outputSchema": null,
+                      "next": "getWebhooksApi",
+                      "prevStep": null,
+                      "enableDebug": false,
+                      "description": null,
+                      "debugBreakAfter": null,
+                      "configuredStepSetting": null,
+                      "filter": null,
+                      "limit": null,
+                      "splitOut": null,
+                      "aggregate": null,
+                      "merge": null,
+                      "aiAgent": null,
+                      "settings": null,
+                      "ftp": null,
+                      "summarizationChain": null,
+                      "textClassifier": null,
+                      "warnings": null,
+                      "tenantSettings": null
+                    },
+                    {
+                      "type": "API",
+                      "id": "getWebhooksApi",
+                      "actionId": null,
+                      "inline": null,
+                      "function": {
+                        "id": "_knexa_2vYTo6rVuOHMoU85kinYpMFfDh5",
+                        "groupId": "_knexa_ae6a88b6-0c2a-4f9d-b3f8-f641a782ab6a",
+                        "connectorId": "community",
+                        "name": "getWebhooks",
+                        "version": "1.0.3",
+                        "imageUrl": null,
+                        "configuration": {
+                          "enableCache": false,
+                          "cacheTtlInSeconds": 0,
+                          "required": true,
+                          "validate": false,
+                          "enableRetry": false,
+                          "enableAuth": true,
+                          "authType": "NO_AUTH",
+                          "auth": {
+                            "identifier": "$fastn_tenant_header",
+                            "authKey": null,
+                            "enableMultiConnection": false,
+                            "isWorkspaceIdentifier": false,
+                            "defaultConnectionId": null
+                          },
+                          "retry": {
+                            "maxRetries": 1,
+                            "maxDelayMilliseconds": 1000,
+                            "enableConnectionErrors": false,
+                            "retryList": [
+                              {
+                                "delayMilliseconds": 50,
+                                "statusCode": 500,
+                                "body": null
+                              }
+                            ]
+                          },
+                          "requestSetting": null
+                        },
+                        "next": null,
+                        "queryExecutor": null
+                      },
+                      "composite": null,
+                      "loop": null,
+                      "internalDatabase": null,
+                      "aiAction": null,
+                      "mcpClient": null,
+                      "logger": null,
+                      "downLoadFile": null,
+                      "endLoop": null,
+                      "trigger": null,
+                      "converter": null,
+                      "variables": null,
+                      "state": null,
+                      "conditional": null,
+                      "lambdaFunction": null,
+                      "outputSchema": null,
+                      "next": null,
+                      "prevStep": null,
+                      "enableDebug": false,
+                      "description": null,
+                      "debugBreakAfter": null,
+                      "configuredStepSetting": null,
+                      "filter": null,
+                      "limit": null,
+                      "splitOut": null,
+                      "aggregate": null,
+                      "merge": null,
+                      "aiAgent": null,
+                      "settings": null,
+                      "ftp": null,
+                      "summarizationChain": null,
+                      "textClassifier": null,
+                      "warnings": null,
+                      "tenantSettings": null
+                    }
+                  ],
+                  "next": "Variable9639",
+                  "start": null,
+                  "queryExecutor": null
+                },
+                "loop": null,
+                "internalDatabase": null,
+                "aiAction": null,
+                "mcpClient": null,
+                "logger": null,
+                "downLoadFile": null,
+                "endLoop": null,
+                "trigger": null,
+                "converter": null,
+                "variables": null,
+                "state": null,
+                "conditional": null,
+                "lambdaFunction": null,
+                "outputSchema": "{\"type\":\"object\",\"description\":\"\",\"title\":\"\",\"properties\":{\"Webhooks\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"ID\":{\"type\":\"string\"},\"Type\":{\"type\":\"string\"},\"Name\":{\"type\":\"string\"},\"IsActive\":{\"type\":\"boolean\"},\"ExternalURL\":{\"type\":\"string\"},\"ExternalAuthorizationType\":{\"type\":\"string\"},\"ExternalUserName\":{\"type\":\"string\"},\"ExternalPassword\":{\"type\":\"string\"},\"ExternalBearerToken\":{\"type\":\"string\"},\"ExternalHeaders\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"Key\":{\"type\":\"string\"},\"Value\":{\"type\":\"string\"}},\"required\":[]}}},\"required\":[]}}},\"required\":[]}",
+                "next": "Variable9639",
+                "prevStep": null,
+                "enableDebug": false,
+                "description": "This tool is designed to execute the getWebhooks operation on the Cin7 platform. It requires the JSON payload to strictly match the expected structure (key and type), otherwise, the operation will fail. Always get confirmation from the user before calling the tool.",
+                "debugBreakAfter": 1,
+                "configuredStepSetting": null,
+                "filter": null,
+                "limit": null,
+                "splitOut": null,
+                "aggregate": null,
+                "merge": null,
+                "aiAgent": null,
+                "settings": {
+                  "failureBehavior": "FAILURE",
+                  "skipStatus": null,
+                  "errorMessage": null,
+                  "stepNote": null
+                },
+                "ftp": null,
+                "summarizationChain": null,
+                "textClassifier": null,
+                "warnings": null,
+                "tenantSettings": null
+              },
+              {
+                "type": "VARIABLE",
+                "id": "Variable9639",
+                "actionId": null,
+                "inline": null,
+                "function": null,
+                "composite": null,
+                "loop": null,
+                "internalDatabase": null,
+                "aiAction": null,
+                "mcpClient": null,
+                "logger": null,
+                "downLoadFile": null,
+                "endLoop": null,
+                "trigger": null,
+                "converter": null,
+                "variables": {
+                  "next": "processWebhookUpdatesAndCreations",
+                  "variables": [],
+                  "code": "\n{\n  \"cin7Webhooks\": {% if data.steps.getWebhooks.output.Webhooks %}{{data.steps.getWebhooks.output.Webhooks| shape}}{% else %}null{% endif %},\n  \"clientWebhooks\": {% if data.var.tenantConfig.syncConfig %}{{data.var.tenantConfig.syncConfig| shape}}{% else %}null{% endif %},\n  \"apiKey\": {% if data.var.tenantConfig.apiKey  is defined %}{{data.var.tenantConfig.apiKey | tojson}}{% else %}null{% endif %}\n}",
+                  "uiCode": "{\"actionType\":\"map\",\"target\":{\"cin7Webhooks\":{\"actionType\":\"map\",\"target\":\"{{data.steps.getWebhooks.output.Webhooks}}\",\"targetType\":\"array\",\"actions\":[],\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"selected\":false,\"autoEscape\":\"AUTO\",\"byUser\":true},\"clientWebhooks\":{\"actionType\":\"map\",\"target\":\"{{data.var.tenantConfig.syncConfig}}\",\"targetType\":\"array\",\"actions\":[],\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"selected\":false,\"autoEscape\":\"AUTO\",\"byUser\":true},\"apiKey\":{\"actionType\":\"map\",\"target\":\"{{data.var.tenantConfig.apiKey}}\",\"targetType\":\"string\",\"actions\":[],\"default\":null,\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":true,\"selected\":false,\"autoEscape\":\"AUTO\",\"byUser\":true}},\"targetType\":\"object\",\"actions\":[],\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"default\":[]}",
+                  "queryExecutor": {
+                    "children": [
+                      {
+                        "key": {
+                          "type": "java.lang.String",
+                          "value": "data"
+                        },
+                        "value": {
+                          "children": [
+                            {
+                              "key": {
+                                "type": "java.lang.String",
+                                "value": "steps"
+                              },
+                              "value": {
+                                "children": [
+                                  {
+                                    "key": {
+                                      "type": "java.lang.String",
+                                      "value": "getWebhooks"
+                                    },
+                                    "value": {
+                                      "children": [
+                                        {
+                                          "key": {
+                                            "type": "java.lang.String",
+                                            "value": "output"
+                                          },
+                                          "value": {
+                                            "children": [
+                                              {
+                                                "key": {
+                                                  "type": "java.lang.String",
+                                                  "value": "Webhooks"
+                                                },
+                                                "value": {
+                                                  "children": [],
+                                                  "returnLiteral": true,
+                                                  "symbolOrIndex": {
+                                                    "type": "java.lang.String",
+                                                    "value": "Webhooks"
+                                                  },
+                                                  "version": 2
+                                                }
+                                              }
+                                            ],
+                                            "returnLiteral": false,
+                                            "symbolOrIndex": {
+                                              "type": "java.lang.String",
+                                              "value": "output"
+                                            },
+                                            "version": 2
+                                          }
+                                        }
+                                      ],
+                                      "returnLiteral": false,
+                                      "symbolOrIndex": {
+                                        "type": "java.lang.String",
+                                        "value": "getWebhooks"
+                                      },
+                                      "version": 2
+                                    }
+                                  }
+                                ],
+                                "returnLiteral": false,
+                                "symbolOrIndex": {
+                                  "type": "java.lang.String",
+                                  "value": "steps"
+                                },
+                                "version": 2
+                              }
+                            },
+                            {
+                              "key": {
+                                "type": "java.lang.String",
+                                "value": "var"
+                              },
+                              "value": {
+                                "children": [
+                                  {
+                                    "key": {
+                                      "type": "java.lang.String",
+                                      "value": "tenantConfig"
+                                    },
+                                    "value": {
+                                      "children": [
+                                        {
+                                          "key": {
+                                            "type": "java.lang.String",
+                                            "value": "apiKey"
+                                          },
+                                          "value": {
+                                            "children": [],
+                                            "returnLiteral": true,
+                                            "symbolOrIndex": {
+                                              "type": "java.lang.String",
+                                              "value": "apiKey"
+                                            },
+                                            "version": 2
+                                          }
+                                        },
+                                        {
+                                          "key": {
+                                            "type": "java.lang.String",
+                                            "value": "syncConfig"
+                                          },
+                                          "value": {
+                                            "children": [],
+                                            "returnLiteral": true,
+                                            "symbolOrIndex": {
+                                              "type": "java.lang.String",
+                                              "value": "syncConfig"
+                                            },
+                                            "version": 2
+                                          }
+                                        }
+                                      ],
+                                      "returnLiteral": false,
+                                      "symbolOrIndex": {
+                                        "type": "java.lang.String",
+                                        "value": "tenantConfig"
+                                      },
+                                      "version": 2
+                                    }
+                                  }
+                                ],
+                                "returnLiteral": false,
+                                "symbolOrIndex": {
+                                  "type": "java.lang.String",
+                                  "value": "var"
+                                },
+                                "version": 2
+                              }
+                            }
+                          ],
+                          "returnLiteral": false,
+                          "symbolOrIndex": {
+                            "type": "java.lang.String",
+                            "value": "data"
+                          },
+                          "version": 2
+                        }
+                      }
+                    ],
+                    "returnLiteral": false,
+                    "symbolOrIndex": {
+                      "type": "null",
+                      "value": null
+                    },
+                    "version": 2
+                  }
+                },
+                "state": null,
+                "conditional": null,
+                "lambdaFunction": null,
+                "outputSchema": null,
+                "next": "processWebhookUpdatesAndCreations",
+                "prevStep": null,
+                "enableDebug": false,
+                "description": null,
+                "debugBreakAfter": 1,
+                "configuredStepSetting": null,
+                "filter": null,
+                "limit": null,
+                "splitOut": null,
+                "aggregate": null,
+                "merge": null,
+                "aiAgent": null,
+                "settings": {
+                  "failureBehavior": "FAILURE",
+                  "skipStatus": null,
+                  "errorMessage": null,
+                  "stepNote": null
+                },
+                "ftp": null,
+                "summarizationChain": null,
+                "textClassifier": null,
+                "warnings": null,
+                "tenantSettings": null
+              },
+              {
+                "type": "LOOP",
+                "id": "LoopOverClientWebhooks",
+                "actionId": null,
+                "inline": null,
+                "function": null,
+                "composite": null,
+                "loop": {
+                  "next": null,
+                  "start": "Variable7167",
+                  "loopOver": "{{data.var.clientWebhooks}}",
+                  "type": "DATA",
+                  "steps": [
+                    {
+                      "type": "VARIABLE",
+                      "id": "Variable7167",
+                      "actionId": null,
+                      "inline": null,
+                      "function": null,
+                      "composite": null,
+                      "loop": null,
+                      "internalDatabase": null,
+                      "aiAction": null,
+                      "mcpClient": null,
+                      "logger": null,
+                      "downLoadFile": null,
+                      "endLoop": null,
+                      "trigger": null,
+                      "converter": null,
+                      "variables": {
+                        "next": "extractWebhookEntity",
+                        "variables": [],
+                        "code": "\n{\n  \"entity\": {% if data.steps.LoopOverClientWebhooks.loopOverItem.entity  is defined %}{{data.steps.LoopOverClientWebhooks.loopOverItem.entity | tojson}}{% else %}\"\"{% endif %},\n  \"url\": {% if data.steps.LoopOverClientWebhooks.loopOverItem.webhook.url  is defined %}{{data.steps.LoopOverClientWebhooks.loopOverItem.webhook.url | tojson}}{% else %}null{% endif %},\n  \"status\": {% if data.steps.LoopOverClientWebhooks.loopOverItem.webhook.status  is defined %}{{data.steps.LoopOverClientWebhooks.loopOverItem.webhook.status | tojson}}{% else %}null{% endif %},\n  \"event\": {% if data.steps.LoopOverClientWebhooks.loopOverItem.webhook.event  is defined %}{{data.steps.LoopOverClientWebhooks.loopOverItem.webhook.event | tojson}}{% else %}null{% endif %}\n}",
+                        "uiCode": "{\"actionType\":\"map\",\"target\":{\"entity\":{\"actionType\":\"map\",\"target\":\"{{data.steps.LoopOverClientWebhooks.loopOverItem.entity}}\",\"targetType\":\"string\",\"actions\":[],\"default\":\"\",\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"selected\":false,\"autoEscape\":\"AUTO\",\"byUser\":true},\"url\":{\"actionType\":\"map\",\"target\":\"{{data.steps.LoopOverClientWebhooks.loopOverItem.webhook.url}}\",\"targetType\":\"string\",\"actions\":[],\"default\":null,\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":true,\"selected\":false,\"autoEscape\":\"AUTO\",\"byUser\":true},\"status\":{\"actionType\":\"map\",\"target\":\"{{data.steps.LoopOverClientWebhooks.loopOverItem.webhook.status}}\",\"targetType\":\"string\",\"actions\":[],\"default\":null,\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":true,\"selected\":false,\"autoEscape\":\"AUTO\",\"byUser\":true},\"event\":{\"actionType\":\"map\",\"target\":\"{{data.steps.LoopOverClientWebhooks.loopOverItem.webhook.event}}\",\"targetType\":\"string\",\"actions\":[],\"default\":null,\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":true,\"selected\":false,\"autoEscape\":\"AUTO\",\"byUser\":true}},\"targetType\":\"object\",\"actions\":[],\"enum\":[],\"title\":\"\",\"description\":\"\",\"isRequred\":false,\"default\":[]}",
+                        "queryExecutor": {
+                          "children": [
+                            {
+                              "key": {
+                                "type": "java.lang.String",
+                                "value": "data"
+                              },
+                              "value": {
+                                "children": [
+                                  {
+                                    "key": {
+                                      "type": "java.lang.String",
+                                      "value": "steps"
+                                    },
+                                    "value": {
+                                      "children": [
+                                        {
+                                          "key": {
+                                            "type": "java.lang.String",
+                                            "value": "LoopOverClientWebhooks"
+                                          },
+                                          "value": {
+                                            "children": [
+                                              {
+                                                "key": {
+                                                  "type": "java.lang.String",
+                                                  "value": "loopOverItem"
+                                                },
+                                                "value": {
+                                                  "children": [
+                                                    {
+                                                      "key": {
+                                                        "type": "java.lang.String",
+                                                        "value": "entity"
+                                                      },
+                                                      "value": {
+                                                        "children": [],
+                                                        "returnLiteral": true,
+                                                        "symbolOrIndex": {
+                                                          "type": "java.lang.String",
+                                                          "value": "entity"
+                                                        },
+                                                        "version": 2
+                                                      }
+                                                    },
+                                                    {
+                                                      "key": {
+                                                        "type": "java.lang.String",
+                                                        "value": "webhook"
+                                                      },
+                                                      "value": {
+                                                        "children": [
+                                                          {
+                                                            "key": {
+                                                              "type": "java.lang.String",
+                                                              "value": "event"
+                                                            },
+                                                            "value": {
+                                                              "children": [],
+                                                              "returnLiteral": true,
+                                                              "symbolOrIndex": {
+                                                                "type": "java.lang.String",
+                                                                "value": "event"
+                                                              },
+                                                              "version": 2
+                                                            }
+                                                          },
+                                                          {
+                                                            "key": {
+                                                              "type": "java.lang.String",
+                                                              "value": "url"
+                                                            },
+                                                            "value": {
+                                                              "children": [],
+                                                              "returnLiteral": true,
+                                                              "symbolOrIndex": {
+                                                                "type": "java.lang.String",
+                                                                "value": "url"
+                                                              },
+                                                              "version": 2
+                                                            }
+                                                          },
+                                                          {
+                                                            "key": {
+                                                              "type": "java.lang.String",
+                                                              "value": "status"
+                                                            },
+                                                            "value": {
+                                                              "children": [],
+                                                              "returnLiteral": true,
+                                                              "symbolOrIndex": {
+                                                                "type": "java.lang.String",
+                                                                "value": "status"
+                                                              },
+                                                              "version": 2
+                                                            }
+                                                          }
+                                                        ],
+                                                        "returnLiteral": false,
+                                                        "symbolOrIndex": {
+                                                          "type": "java.lang.String",
+                                                          "value": "webhook"
+                                                        },
+                                                        "version": 2
+                                                      }
+                                                    }
+                                                  ],
+                                                  "returnLiteral": false,
+                                                  "symbolOrIndex": {
+                                                    "type": "java.lang.String",
+                                                    "value": "loopOverItem"
+                                                  },
+                                                  "version": 2
+                                                }
+                                              }
+                                            ],
+                                            "returnLiteral": false,
+                                            "symbolOrIndex": {
+                                              "type": "java.lang.String",
+                                              "value": "LoopOverClientWebhooks"
+                                            },
+                                            "version": 2
+                                          }
+                                        }
+                                      ],
+                                      "returnLiteral": false,
+                                      "symbolOrIndex": {
+                                        "type": "java.lang.String",
+                                        "value": "steps"
+                                      },
+                                      "version": 2
+                                    }
+                                  }
+                                ],
+                                "returnLiteral": false,
+                                "symbolOrIndex": {
+                                  "type": "java.lang.String",
+                                  "value": "data"
+                                },
+                                "version": 2
+                              }
+                            }
+                          ],
+                          "returnLiteral": false,
+                          "symbolOrIndex": {
+                            "type": "null",
+                            "value": null
+                          },
+                          "version": 2
+                        }
+                      },
+                      "state": null,
+                      "conditional": null,
+                      "lambdaFunction": null,
+                      "outputSchema": null,
+                      "next": "extractWebhookEntity",
+                      "prevStep": null,
+                      "enableDebug": false,
+                      "description": null,
+                      "debugBreakAfter": 1,
+                      "configuredStepSetting": null,
+                      "filter": null,
+                      "limit": null,
+                      "splitOut": null,
+                      "aggregate": null,
+                      "merge": null,
+                      "aiAgent": null,
+                      "settings": {
+                        "failureBehavior": "FAILURE",
+                        "skipStatus": null,
+                        "errorMessage": null,
+                        "stepNote": null
+                      },
+                      "ftp": null,
+                      "summarizationChain": null,
+                      "textClassifier": null,
+                      "warnings": null,
+                      "tenantSettings": null
+                    },
+                    {
+                      "type": "INLINE",
+                      "id": "extractWebhookEntity",
+                      "actionId": null,
+                      "inline": {
+                        "code": "function handler(params) {\n    const cin7Webhooks = params.data.var.cin7Webhooks;\n     const clientWebhooks = params.data.var.clientWebhooks;\n    const arrayOfWebHookToCreate = [];\n    const arrayOfWebHookToUpdate = [];\n\n    // Process each client webhook\n    clientWebhooks.forEach(clientWebhook => {\n      const webhookUrl = clientWebhook.webhook.url;\n      const webhookEvent = clientWebhook.webhook.event;\n      const webhookStatus = clientWebhook.webhook.status;\n\n      // Check if this URL already exists in cin7Webhooks\n      const existingCin7Webhook = cin7Webhooks.find(\n        cin7Webhook => cin7Webhook.ExternalURL === webhookUrl\n      );\n\n      if (existingCin7Webhook) {\n        // Found - prepare for update with modified status and event type\n        arrayOfWebHookToUpdate.push({\n          ...existingCin7Webhook,\n          Type: webhookEvent,\n          IsActive: webhookStatus === 'Active'\n        });\n      } else {\n        // Not found - prepare for creation (without ID and Name properties)\n        arrayOfWebHookToCreate.push({\n          Type: webhookEvent,\n          IsActive: webhookStatus === 'Active',\n          ExternalURL: webhookUrl,\n          ExternalAuthorizationType: 'noauth',\n          ExternalUserName: null,\n          ExternalPassword: null,\n          ExternalBearerToken: null,\n          ExternalHeaders: headers || []\n        });\n      }\n    });\n\n    return { arrayOfWebHookToCreate, arrayOfWebHookToUpdate };\n  }",
+                        "language": "JAVASCRIPT",
+                        "fields": [],
+                        "next": null,
+                        "uiCode": "function handler(params) {\n    const cin7Webhooks = params.data.var.cin7Webhooks;\n     const clientWebhooks = params.data.var.clientWebhooks;\n    const arrayOfWebHookToCreate = [];\n    const arrayOfWebHookToUpdate = [];\n\n    // Process each client webhook\n    clientWebhooks.forEach(clientWebhook => {\n      const webhookUrl = clientWebhook.webhook.url;\n      const webhookEvent = clientWebhook.webhook.event;\n      const webhookStatus = clientWebhook.webhook.status;\n\n      // Check if this URL already exists in cin7Webhooks\n      const existingCin7Webhook = cin7Webhooks.find(\n        cin7Webhook => cin7Webhook.ExternalURL === webhookUrl\n      );\n\n      if (existingCin7Webhook) {\n        // Found - prepare for update with modified status and event type\n        arrayOfWebHookToUpdate.push({\n          ...existingCin7Webhook,\n          Type: webhookEvent,\n          IsActive: webhookStatus === 'Active'\n        });\n      } else {\n        // Not found - prepare for creation (without ID and Name properties)\n        arrayOfWebHookToCreate.push({\n          Type: webhookEvent,\n          IsActive: webhookStatus === 'Active',\n          ExternalURL: webhookUrl,\n          ExternalAuthorizationType: 'noauth',\n          ExternalUserName: null,\n          ExternalPassword: null,\n          ExternalBearerToken: null,\n          ExternalHeaders: headers || []\n        });\n      }\n    });\n\n    return { arrayOfWebHookToCreate, arrayOfWebHookToUpdate };\n  }",
+                        "hasResponse": false,
+                        "isError": false,
+                        "statusCode": 200,
+                        "outputSchema": null,
+                        "queryExecutor": null
+                      },
+                      "function": null,
+                      "composite": null,
+                      "loop": null,
+                      "internalDatabase": null,
+                      "aiAction": null,
+                      "mcpClient": null,
+                      "logger": null,
+                      "downLoadFile": null,
+                      "endLoop": null,
+                      "trigger": null,
+                      "converter": null,
+                      "variables": null,
+                      "state": null,
+                      "conditional": null,
+                      "lambdaFunction": null,
+                      "outputSchema": null,
+                      "next": null,
+                      "prevStep": null,
+                      "enableDebug": false,
+                      "description": null,
+                      "debugBreakAfter": 1,
+                      "configuredStepSetting": null,
+                      "filter": null,
+                      "limit": null,
+                      "splitOut": null,
+                      "aggregate": null,
+                      "merge": null,
+                      "aiAgent": null,
+                      "settings": {
+                        "failureBehavior": "FAILURE",
+                        "skipStatus": null,
+                        "errorMessage": null,
+                        "stepNote": null
+                      },
+                      "ftp": null,
+                      "summarizationChain": null,
+                      "textClassifier": null,
+                      "warnings": null,
+                      "tenantSettings": null
+                    }
+                  ],
+                  "itemSchema": "{\n\t\"type\": \"object\"\n}",
+                  "isParallel": false,
+                  "loopSize": "0",
+                  "loopStart": "0",
+                  "filePath": null,
+                  "batchSize": null,
+                  "queryExecutor": null
+                },
+                "internalDatabase": null,
+                "aiAction": null,
+                "mcpClient": null,
+                "logger": null,
+                "downLoadFile": null,
+                "endLoop": null,
+                "trigger": null,
+                "converter": null,
+                "variables": null,
+                "state": null,
+                "conditional": null,
+                "lambdaFunction": null,
+                "outputSchema": null,
+                "next": null,
+                "prevStep": null,
+                "enableDebug": false,
+                "description": null,
+                "debugBreakAfter": 1,
+                "configuredStepSetting": null,
+                "filter": null,
+                "limit": null,
+                "splitOut": null,
+                "aggregate": null,
+                "merge": null,
+                "aiAgent": null,
+                "settings": {
+                  "failureBehavior": "FAILURE",
+                  "skipStatus": null,
+                  "errorMessage": null,
+                  "stepNote": null
+                },
+                "ftp": null,
+                "summarizationChain": null,
+                "textClassifier": null,
+                "warnings": null,
+                "tenantSettings": null
+              },
+              {
+                "type": "INLINE",
+                "id": "processWebhookUpdatesAndCreations",
+                "actionId": null,
+                "inline": {
+                  "code": " function handler(params) {\n      const cin7Webhooks = params.data.var.cin7Webhooks || [];\n      const clientWebhooks = params.data.var.clientWebhooks || [];\n      const arrayOfWebHookToCreate = [];\n      const arrayOfWebHookToUpdate = [];\n\n      const tenantId = params.data.headers[\"x-fastn-space-tenantid\"];\n      const spaceId = params.data.headers[\"x-fastn-space-id\"] || \"d0f8c7f3-69d3-403c-90a0-17c8857e095f\";\n      const connectionId = params.data.headers[\"x-fastn-space-connection-id\"] || \"default\";\n      const bearerToken = \"fdaf8895-2fdb-478b-babe-56deb85041cb\";\n      const stage = \"LIVE\";\n      const apiKey = params.data.var.apiKey || \"9e8a14d0-b3c6-4a47-b821-126c56cce6da\";\n\n      // Build ExternalHeaders array\n      const externalHeaders = [\n        {\n          Key: \"x-fastn-space-tenantId\",  // ← Changed to capital I\n          Value: tenantId\n        },\n        {\n          Key: \"x-fastn-space-id\",\n          Value: spaceId\n        },\n        {\n          Key: \"x-fastn-space-connection-id\",\n          Value: connectionId\n        },\n        {\n          Key: \"stage\",\n          Value: stage\n        },\n        {\n          Key: \"x-app-source\",\n          Value: \"cin7\"\n        },\n        {\n          Key: \"x-fastn-api-key\",\n          Value: apiKey\n        }\n      ];\n\n      // Helper function to check if API key has changed\n      const hasApiKeyChanged = (existingWebhook) => {\n        const existingHeaders = existingWebhook.ExternalHeaders || [];\n        const existingApiKeyHeader = existingHeaders.find(h => h.Key === \"x-fastn-api-key\");\n\n        // If no API key exists in existing webhook, it's considered changed\n        if (!existingApiKeyHeader) {\n          return true;\n        }\n\n        // Compare values\n        return existingApiKeyHeader.Value !== apiKey;\n      };\n\n      // Flatten clientWebhooks to handle webhook as array or object\n      const flattenedWebhooks = [];\n      clientWebhooks.forEach(config => {\n        // Skip if webhook is not defined or empty\n        if (!config.webhook) {\n          return;\n        }\n\n        // Handle both array and object formats\n        const webhooks = Array.isArray(config.webhook) ? config.webhook : [config.webhook];\n\n        // Filter out null/undefined webhooks and process valid ones\n        webhooks.filter(webhook => webhook).forEach(webhook => {\n          flattenedWebhooks.push({\n            entity: config.entity,\n            webhook: webhook\n          });\n        });\n      });\n\n      // Process each client webhook\n      flattenedWebhooks.forEach(clientWebhook => {\n        const webhookUrl = clientWebhook.webhook.url;\n        const webhookEvent = clientWebhook.webhook.event;\n        const webhookStatus = clientWebhook.webhook.status;\n        const desiredIsActive = webhookStatus === 'Active';\n\n        // Check if this URL already exists in cin7Webhooks\n        const existingCin7Webhook = cin7Webhooks.find(\n          cin7Webhook => cin7Webhook.ExternalURL === webhookUrl\n        );\n\n        if (existingCin7Webhook) {\n          // Found webhook with matching URL\n          const eventChanged = existingCin7Webhook.Type !== webhookEvent;\n          const statusChanged = existingCin7Webhook.IsActive !== desiredIsActive;\n          const apiKeyChanged = hasApiKeyChanged(existingCin7Webhook);\n\n          if (eventChanged) {\n            // Event changed - need to deactivate current and create/reactivate correct one\n\n            // Deactivate the existing webhook (only if it's currently active)\n            if (existingCin7Webhook.IsActive) {\n              arrayOfWebHookToUpdate.push({\n                ...existingCin7Webhook,\n                IsActive: false\n              });\n            }\n\n            // Look for a webhook with the same URL and correct event type\n            const correctEventWebhook = cin7Webhooks.find(\n              cin7Webhook => cin7Webhook.ExternalURL === webhookUrl && cin7Webhook.Type === webhookEvent\n            );\n\n            if (correctEventWebhook) {\n              // Found webhook with correct event - reactivate if needed or update API key\n              if (correctEventWebhook.IsActive !== desiredIsActive || hasApiKeyChanged(correctEventWebhook)) {\n                arrayOfWebHookToUpdate.push({\n                  ...correctEventWebhook,\n                  IsActive: desiredIsActive,\n                  ExternalHeaders: externalHeaders\n                });\n              }\n            } else {\n              // No webhook with correct event exists - create new one\n              arrayOfWebHookToCreate.push({\n                Type: webhookEvent,\n                IsActive: desiredIsActive,\n                ExternalURL: webhookUrl,\n                ExternalAuthorizationType: 'bearerauth',\n                ExternalBearerToken: bearerToken,\n                ExternalHeaders: externalHeaders\n              });\n            }\n          } else if (statusChanged || apiKeyChanged) {\n            // Event is the same, but status or API key changed - update\n            arrayOfWebHookToUpdate.push({\n              ...existingCin7Webhook,\n              IsActive: desiredIsActive,\n              ExternalHeaders: externalHeaders\n            });\n          }\n          // If nothing changed, do nothing\n        } else {\n          // Not found - prepare for creation\n          arrayOfWebHookToCreate.push({\n            Type: webhookEvent,\n            IsActive: desiredIsActive,\n            ExternalURL: webhookUrl,\n            ExternalAuthorizationType: 'bearerauth',\n            ExternalBearerToken: bearerToken,\n            ExternalHeaders: externalHeaders\n          });\n        }\n      });\n\n      return { arrayOfWebHookToCreate, arrayOfWebHookToUpdate };\n    }",
+                  "language": "JAVASCRIPT",
+                  "fields": [],
+                  "next": "loopOverArrayOfWebHookToCreate",
+                  "uiCode": " function handler(params) {\n      const cin7Webhooks = params.data.var.cin7Webhooks || [];\n      const clientWebhooks = params.data.var.clientWebhooks || [];\n      const arrayOfWebHookToCreate = [];\n      const arrayOfWebHookToUpdate = [];\n\n      const tenantId = params.data.headers[\"x-fastn-space-tenantid\"];\n      const spaceId = params.data.headers[\"x-fastn-space-id\"] || \"d0f8c7f3-69d3-403c-90a0-17c8857e095f\";\n      const connectionId = params.data.headers[\"x-fastn-space-connection-id\"] || \"default\";\n      const bearerToken = \"fdaf8895-2fdb-478b-babe-56deb85041cb\";\n      const stage = \"LIVE\";\n      const apiKey = params.data.var.apiKey || \"9e8a14d0-b3c6-4a47-b821-126c56cce6da\";\n\n      // Build ExternalHeaders array\n      const externalHeaders = [\n        {\n          Key: \"x-fastn-space-tenantId\",  // ← Changed to capital I\n          Value: tenantId\n        },\n        {\n          Key: \"x-fastn-space-id\",\n          Value: spaceId\n        },\n        {\n          Key: \"x-fastn-space-connection-id\",\n          Value: connectionId\n        },\n        {\n          Key: \"stage\",\n          Value: stage\n        },\n        {\n          Key: \"x-app-source\",\n          Value: \"cin7\"\n        },\n        {\n          Key: \"x-fastn-api-key\",\n          Value: apiKey\n        }\n      ];\n\n      // Helper function to check if API key has changed\n      const hasApiKeyChanged = (existingWebhook) => {\n        const existingHeaders = existingWebhook.ExternalHeaders || [];\n        const existingApiKeyHeader = existingHeaders.find(h => h.Key === \"x-fastn-api-key\");\n\n        // If no API key exists in existing webhook, it's considered changed\n        if (!existingApiKeyHeader) {\n          return true;\n        }\n\n        // Compare values\n        return existingApiKeyHeader.Value !== apiKey;\n      };\n\n      // Flatten clientWebhooks to handle webhook as array or object\n      const flattenedWebhooks = [];\n      clientWebhooks.forEach(config => {\n        // Skip if webhook is not defined or empty\n        if (!config.webhook) {\n          return;\n        }\n\n        // Handle both array and object formats\n        const webhooks = Array.isArray(config.webhook) ? config.webhook : [config.webhook];\n\n        // Filter out null/undefined webhooks and process valid ones\n        webhooks.filter(webhook => webhook).forEach(webhook => {\n          flattenedWebhooks.push({\n            entity: config.entity,\n            webhook: webhook\n          });\n        });\n      });\n\n      // Process each client webhook\n      flattenedWebhooks.forEach(clientWebhook => {\n        const webhookUrl = clientWebhook.webhook.url;\n        const webhookEvent = clientWebhook.webhook.event;\n        const webhookStatus = clientWebhook.webhook.status;\n        const desiredIsActive = webhookStatus === 'Active';\n\n        // Check if this URL already exists in cin7Webhooks\n        const existingCin7Webhook = cin7Webhooks.find(\n          cin7Webhook => cin7Webhook.ExternalURL === webhookUrl\n        );\n\n        if (existingCin7Webhook) {\n          // Found webhook with matching URL\n          const eventChanged = existingCin7Webhook.Type !== webhookEvent;\n          const statusChanged = existingCin7Webhook.IsActive !== desiredIsActive;\n          const apiKeyChanged = hasApiKeyChanged(existingCin7Webhook);\n\n          if (eventChanged) {\n            // Event changed - need to deactivate current and create/reactivate correct one\n\n            // Deactivate the existing webhook (only if it's currently active)\n            if (existingCin7Webhook.IsActive) {\n              arrayOfWebHookToUpdate.push({\n                ...existingCin7Webhook,\n                IsActive: false\n              });\n            }\n\n            // Look for a webhook with the same URL and correct event type\n            const correctEventWebhook = cin7Webhooks.find(\n              cin7Webhook => cin7Webhook.ExternalURL === webhookUrl && cin7Webhook.Type === webhookEvent\n            );\n\n            if (correctEventWebhook) {\n              // Found webhook with correct event - reactivate if needed or update API key\n              if (correctEventWebhook.IsActive !== desiredIsActive || hasApiKeyChanged(correctEventWebhook)) {\n                arrayOfWebHookToUpdate.push({\n                  ...correctEventWebhook,\n                  IsActive: desiredIsActive,\n                  ExternalHeaders: externalHeaders\n                });\n              }\n            } else {\n              // No webhook with correct event exists - create new one\n              arrayOfWebHookToCreate.push({\n                Type: webhookEvent,\n                IsActive: desiredIsActive,\n                ExternalURL: webhookUrl,\n                ExternalAuthorizationType: 'bearerauth',\n                ExternalBearerToken: bearerToken,\n                ExternalHeaders: externalHeaders\n              });\n            }\n          } else if (statusChanged || apiKeyChanged) {\n            // Event is the same, but status or API key changed - update\n            arrayOfWebHookToUpdate.push({\n              ...existingCin7Webhook,\n              IsActive: desiredIsActive,\n              ExternalHeaders: externalHeaders\n            });\n          }\n          // If nothing changed, do nothing\n        } else {\n          // Not found - prepare for creation\n          arrayOfWebHookToCreate.push({\n            Type: webhookEvent,\n            IsActive: desiredIsActive,\n            ExternalURL: webhookUrl,\n            ExternalAuthorizationType: 'bearerauth',\n            ExternalBearerToken: bearerToken,\n            ExternalHeaders: externalHeaders\n          });\n        }\n      });\n\n      return { arrayOfWebHookToCreate, arrayOfWebHookToUpdate };\n    }",
+                  "hasResponse": false,
+                  "isError": false,
+                  "statusCode": 200,
+                  "outputSchema": null,
+                  "queryExecutor": null
+                },
+                "function": null,
+                "composite": null,
+                "loop": null,
+                "internalDatabase": null,
+                "aiAction": null,
+                "mcpClient": null,
+                "logger": null,
+                "downLoadFile": null,
+                "endLoop": null,
+                "trigger": null,
+                "converter": null,
+                "variables": null,
+                "state": null,
+                "conditional": null,
+                "lambdaFunction": null,
+                "outputSchema": null,
+                "next": "loopOverArrayOfWebHookToCreate",
+                "prevStep": null,
+                "enableDebug": false,
+                "description": null,
+                "debugBreakAfter": 1,
+                "configuredStepSetting": null,
+                "filter": null,
+                "limit": null,
+                "splitOut": null,
+                "aggregate": null,
+                "merge": null,
+                "aiAgent": null,
+                "settings": {
+                  "failureBehavior": "FAILURE",
+                  "skipStatus": null,
+                  "errorMessage": null,
+                  "stepNote": null
+                },
+                "ftp": null,
+                "summarizationChain": null,
+                "textClassifier": null,
+                "warnings": null,
+                "tenantSettings": null
+              },
+              {
+                "type": "LOOP",
+                "id": "loopOverArrayOfWebHookToCreate",
+                "actionId": null,
+                "inline": null,
+                "function": null,
+                "composite": null,
+                "loop": {
+                  "next": "loopOverArrayOfWebHookToUpdate",
+                  "start": "Log1",
+                  "loopOver": "{{data.steps.processWebhookUpdatesAndCreations.output.arrayOfWebHookToCreate}}",
+                  "type": "DATA",
+                  "steps": [
+                    {
+                      "type": "LOGGER",
+                      "id": "Log1",
+                      "actionId": null,
+                      "inline": null,
+                      "function": null,
+                      "composite": null,
+                      "loop": null,
+                      "internalDatabase": null,
+                      "aiAction": null,
+                      "mcpClient": null,
+                      "logger": {
+                        "next": "createWebhook",
+                        "context": "Creating hook for {{data.steps.loopOverArrayOfWebHookToCreate.loopOverItem.ExternalURL}}",
+                        "message": null,
+                        "queryExecutor": null
+                      },
+                      "downLoadFile": null,
+                      "endLoop": null,
+                      "trigger": null,
+                      "converter": null,
+                      "variables": null,
+                      "state": null,
+                      "conditional": null,
+                      "lambdaFunction": null,
+                      "outputSchema": null,
+                      "next": "createWebhook",
+                      "prevStep": null,
+                      "enableDebug": false,
+                      "description": null,
+                      "debugBreakAfter": 1,
+                      "configuredStepSetting": null,
+                      "filter": null,
+                      "limit": null,
+                      "splitOut": null,
+                      "aggregate": null,
+                      "merge": null,
+                      "aiAgent": null,
+                      "settings": {
+                        "failureBehavior": "FAILURE",
+                        "skipStatus": null,
+                        "errorMessage": null,
+                        "stepNote": null
+                      },
+                      "ftp": null,
+                      "summarizationChain": null,
+                      "textClassifier": null,
+                      "warnings": null,
+                      "tenantSettings": null
+                    },
+                    {
+                      "type": "COMPOSITE",
+                      "id": "createWebhook",
+                      "actionId": null,
+                      "inline": null,
+                      "function": null,
+                      "composite": {
+                        "steps": [
+                          {
+                            "type": "INLINE",
+                            "id": "createWebhookMap",
+                            "actionId": null,
+                            "inline": {
+                              "code": "function handler(params) {\n    return {\n\t\t\"body\": params.data.steps.loopOverArrayOfWebHookToCreate.loopOverItem\n\t}\n  }\n    ",
+                              "language": "JAVASCRIPT",
+                              "fields": [],
+                              "next": "createWebhookApi",
+                              "uiCode": "function handler(params) {\n    return {\n\t\t\"body\": params.data.steps.loopOverArrayOfWebHookToCreate.loopOverItem\n\t}\n  }\n    ",
+                              "hasResponse": false,
+                              "isError": false,
+                              "statusCode": 200,
+                              "outputSchema": null,
+                              "queryExecutor": null
+                            },
+                            "function": null,
+                            "composite": null,
+                            "loop": null,
+                            "internalDatabase": null,
+                            "aiAction": null,
+                            "mcpClient": null,
+                            "logger": null,
+                            "downLoadFile": null,
+                            "endLoop": null,
+                            "trigger": null,
+                            "converter": null,
+                            "variables": null,
+                            "state": null,
+                            "conditional": null,
+                            "lambdaFunction": null,
+                            "outputSchema": null,
+                            "next": "createWebhookApi",
+                            "prevStep": null,
+                            "enableDebug": false,
+                            "description": null,
+                            "debugBreakAfter": null,
+                            "configuredStepSetting": null,
+                            "filter": null,
+                            "limit": null,
+                            "splitOut": null,
+                            "aggregate": null,
+                            "merge": null,
+                            "aiAgent": null,
+                            "settings": null,
+                            "ftp": null,
+                            "summarizationChain": null,
+                            "textClassifier": null,
+                            "warnings": null,
+                            "tenantSettings": null
+                          },
+                          {
+                            "type": "API",
+                            "id": "createWebhookApi",
+                            "actionId": null,
+                            "inline": null,
+                            "function": {
+                              "id": "_knexa_2vYU0yOdvHOr2z81ZYCE41LvW3m",
+                              "groupId": "_knexa_ae6a88b6-0c2a-4f9d-b3f8-f641a782ab6a",
+                              "connectorId": "community",
+                              "name": "createWebhook",
+                              "version": "1.0.3",
+                              "imageUrl": null,
+                              "configuration": {
+                                "enableCache": false,
+                                "cacheTtlInSeconds": 0,
+                                "required": true,
+                                "validate": false,
+                                "enableRetry": false,
+                                "enableAuth": true,
+                                "authType": "NO_AUTH",
+                                "auth": {
+                                  "identifier": "$fastn_tenant_header",
+                                  "authKey": null,
+                                  "enableMultiConnection": false,
+                                  "isWorkspaceIdentifier": false,
+                                  "defaultConnectionId": null
+                                },
+                                "retry": {
+                                  "maxRetries": 1,
+                                  "maxDelayMilliseconds": 1000,
+                                  "enableConnectionErrors": false,
+                                  "retryList": [
+                                    {
+                                      "delayMilliseconds": 50,
+                                      "statusCode": 500,
+                                      "body": null
+                                    }
+                                  ]
+                                },
+                                "requestSetting": null
+                              },
+                              "next": null,
+                              "queryExecutor": null
+                            },
+                            "composite": null,
+                            "loop": null,
+                            "internalDatabase": null,
+                            "aiAction": null,
+                            "mcpClient": null,
+                            "logger": null,
+                            "downLoadFile": null,
+                            "endLoop": null,
+                            "trigger": null,
+                            "converter": null,
+                            "variables": null,
+                            "state": null,
+                            "conditional": null,
+                            "lambdaFunction": null,
+                            "outputSchema": null,
+                            "next": null,
+                            "prevStep": null,
+                            "enableDebug": false,
+                            "description": null,
+                            "debugBreakAfter": null,
+                            "configuredStepSetting": null,
+                            "filter": null,
+                            "limit": null,
+                            "splitOut": null,
+                            "aggregate": null,
+                            "merge": null,
+                            "aiAgent": null,
+                            "settings": null,
+                            "ftp": null,
+                            "summarizationChain": null,
+                            "textClassifier": null,
+                            "warnings": null,
+                            "tenantSettings": null
+                          }
+                        ],
+                        "next": null,
+                        "start": null,
+                        "queryExecutor": null
+                      },
+                      "loop": null,
+                      "internalDatabase": null,
+                      "aiAction": null,
+                      "mcpClient": null,
+                      "logger": null,
+                      "downLoadFile": null,
+                      "endLoop": null,
+                      "trigger": null,
+                      "converter": null,
+                      "variables": null,
+                      "state": null,
+                      "conditional": null,
+                      "lambdaFunction": null,
+                      "outputSchema": "{\"type\":\"object\",\"description\":\"\",\"title\":\"\",\"properties\":{\"ID\":{\"type\":\"string\"},\"Type\":{\"type\":\"string\"},\"Name\":{\"type\":\"string\"},\"IsActive\":{\"type\":\"boolean\"},\"ExternalURL\":{\"type\":\"string\"},\"ExternalAuthorizationType\":{\"type\":\"string\"},\"ExternalUserName\":{\"type\":\"string\"},\"ExternalPassword\":{\"type\":\"string\"},\"ExternalBearerToken\":{\"type\":\"string\"},\"ExternalHeaders\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"Key\":{\"type\":\"string\"},\"Value\":{\"type\":\"string\"}},\"required\":[]}}},\"required\":[]}",
+                      "next": null,
+                      "prevStep": null,
+                      "enableDebug": false,
+                      "description": "This tool is designed to execute the createWebhook operation on the Cin7 platform. It requires the JSON payload to strictly match the expected structure (key and type), otherwise, the operation will fail. Always get confirmation from the user before calling the tool.",
+                      "debugBreakAfter": 1,
+                      "configuredStepSetting": null,
+                      "filter": null,
+                      "limit": null,
+                      "splitOut": null,
+                      "aggregate": null,
+                      "merge": null,
+                      "aiAgent": null,
+                      "settings": {
+                        "failureBehavior": "FAILURE",
+                        "skipStatus": null,
+                        "errorMessage": null,
+                        "stepNote": null
+                      },
+                      "ftp": null,
+                      "summarizationChain": null,
+                      "textClassifier": null,
+                      "warnings": null,
+                      "tenantSettings": null
+                    }
+                  ],
+                  "itemSchema": "{\n\t\"type\": \"object\"\n}",
+                  "isParallel": false,
+                  "loopSize": "0",
+                  "loopStart": "0",
+                  "filePath": null,
+                  "batchSize": null,
+                  "queryExecutor": null
+                },
+                "internalDatabase": null,
+                "aiAction": null,
+                "mcpClient": null,
+                "logger": null,
+                "downLoadFile": null,
+                "endLoop": null,
+                "trigger": null,
+                "converter": null,
+                "variables": null,
+                "state": null,
+                "conditional": null,
+                "lambdaFunction": null,
+                "outputSchema": null,
+                "next": "loopOverArrayOfWebHookToUpdate",
+                "prevStep": null,
+                "enableDebug": false,
+                "description": null,
+                "debugBreakAfter": 1,
+                "configuredStepSetting": null,
+                "filter": null,
+                "limit": null,
+                "splitOut": null,
+                "aggregate": null,
+                "merge": null,
+                "aiAgent": null,
+                "settings": {
+                  "failureBehavior": "FAILURE",
+                  "skipStatus": null,
+                  "errorMessage": null,
+                  "stepNote": null
+                },
+                "ftp": null,
+                "summarizationChain": null,
+                "textClassifier": null,
+                "warnings": null,
+                "tenantSettings": null
+              },
+              {
+                "type": "LOOP",
+                "id": "loopOverArrayOfWebHookToUpdate",
+                "actionId": null,
+                "inline": null,
+                "function": null,
+                "composite": null,
+                "loop": {
+                  "next": null,
+                  "start": "Log2",
+                  "loopOver": "{{data.steps.processWebhookUpdatesAndCreations.output.arrayOfWebHookToUpdate}}",
+                  "type": "DATA",
+                  "steps": [
+                    {
+                      "type": "LOGGER",
+                      "id": "Log2",
+                      "actionId": null,
+                      "inline": null,
+                      "function": null,
+                      "composite": null,
+                      "loop": null,
+                      "internalDatabase": null,
+                      "aiAction": null,
+                      "mcpClient": null,
+                      "logger": {
+                        "next": "updateWebhook",
+                        "context": "Updating hook for {{data.steps.loopOverArrayOfWebhookToCreate.loopOverItem.ExternalURL}}",
+                        "message": null,
+                        "queryExecutor": {
+                          "children": [
+                            {
+                              "key": {
+                                "type": "java.lang.String",
+                                "value": "data"
+                              },
+                              "value": {
+                                "children": [
+                                  {
+                                    "key": {
+                                      "type": "java.lang.String",
+                                      "value": "steps"
+                                    },
+                                    "value": {
+                                      "children": [
+                                        {
+                                          "key": {
+                                            "type": "java.lang.String",
+                                            "value": "loopOverArrayOfWebhookToCreate"
+                                          },
+                                          "value": {
+                                            "children": [
+                                              {
+                                                "key": {
+                                                  "type": "java.lang.String",
+                                                  "value": "loopOverItem"
+                                                },
+                                                "value": {
+                                                  "children": [
+                                                    {
+                                                      "key": {
+                                                        "type": "java.lang.String",
+                                                        "value": "ExternalURL"
+                                                      },
+                                                      "value": {
+                                                        "children": [],
+                                                        "returnLiteral": true,
+                                                        "symbolOrIndex": {
+                                                          "type": "java.lang.String",
+                                                          "value": "ExternalURL"
+                                                        },
+                                                        "version": 2
+                                                      }
+                                                    }
+                                                  ],
+                                                  "returnLiteral": false,
+                                                  "symbolOrIndex": {
+                                                    "type": "java.lang.String",
+                                                    "value": "loopOverItem"
+                                                  },
+                                                  "version": 2
+                                                }
+                                              }
+                                            ],
+                                            "returnLiteral": false,
+                                            "symbolOrIndex": {
+                                              "type": "java.lang.String",
+                                              "value": "loopOverArrayOfWebhookToCreate"
+                                            },
+                                            "version": 2
+                                          }
+                                        }
+                                      ],
+                                      "returnLiteral": false,
+                                      "symbolOrIndex": {
+                                        "type": "java.lang.String",
+                                        "value": "steps"
+                                      },
+                                      "version": 2
+                                    }
+                                  }
+                                ],
+                                "returnLiteral": false,
+                                "symbolOrIndex": {
+                                  "type": "java.lang.String",
+                                  "value": "data"
+                                },
+                                "version": 2
+                              }
+                            }
+                          ],
+                          "returnLiteral": false,
+                          "symbolOrIndex": {
+                            "type": "null",
+                            "value": null
+                          },
+                          "version": 2
+                        }
+                      },
+                      "downLoadFile": null,
+                      "endLoop": null,
+                      "trigger": null,
+                      "converter": null,
+                      "variables": null,
+                      "state": null,
+                      "conditional": null,
+                      "lambdaFunction": null,
+                      "outputSchema": null,
+                      "next": "updateWebhook",
+                      "prevStep": null,
+                      "enableDebug": false,
+                      "description": null,
+                      "debugBreakAfter": 1,
+                      "configuredStepSetting": null,
+                      "filter": null,
+                      "limit": null,
+                      "splitOut": null,
+                      "aggregate": null,
+                      "merge": null,
+                      "aiAgent": null,
+                      "settings": {
+                        "failureBehavior": "FAILURE",
+                        "skipStatus": null,
+                        "errorMessage": null,
+                        "stepNote": null
+                      },
+                      "ftp": null,
+                      "summarizationChain": null,
+                      "textClassifier": null,
+                      "warnings": null,
+                      "tenantSettings": null
+                    },
+                    {
+                      "type": "COMPOSITE",
+                      "id": "updateWebhook",
+                      "actionId": null,
+                      "inline": null,
+                      "function": null,
+                      "composite": {
+                        "steps": [
+                          {
+                            "type": "INLINE",
+                            "id": "updateWebhookMap",
+                            "actionId": null,
+                            "inline": {
+                              "code": "function handler(params) {\n    return {\n\t\t\"body\": params.data.steps.loopOverArrayOfWebHookToUpdate.loopOverItem\n\t}\n  }\n    ",
+                              "language": "JAVASCRIPT",
+                              "fields": [],
+                              "next": "updateWebhookApi",
+                              "uiCode": "function handler(params) {\n    return {\n\t\t\"body\": params.data.steps.loopOverArrayOfWebHookToUpdate.loopOverItem\n\t}\n  }\n    ",
+                              "hasResponse": false,
+                              "isError": false,
+                              "statusCode": 200,
+                              "outputSchema": null,
+                              "queryExecutor": null
+                            },
+                            "function": null,
+                            "composite": null,
+                            "loop": null,
+                            "internalDatabase": null,
+                            "aiAction": null,
+                            "mcpClient": null,
+                            "logger": null,
+                            "downLoadFile": null,
+                            "endLoop": null,
+                            "trigger": null,
+                            "converter": null,
+                            "variables": null,
+                            "state": null,
+                            "conditional": null,
+                            "lambdaFunction": null,
+                            "outputSchema": null,
+                            "next": "updateWebhookApi",
+                            "prevStep": null,
+                            "enableDebug": false,
+                            "description": null,
+                            "debugBreakAfter": null,
+                            "configuredStepSetting": null,
+                            "filter": null,
+                            "limit": null,
+                            "splitOut": null,
+                            "aggregate": null,
+                            "merge": null,
+                            "aiAgent": null,
+                            "settings": null,
+                            "ftp": null,
+                            "summarizationChain": null,
+                            "textClassifier": null,
+                            "warnings": null,
+                            "tenantSettings": null
+                          },
+                          {
+                            "type": "API",
+                            "id": "updateWebhookApi",
+                            "actionId": null,
+                            "inline": null,
+                            "function": {
+                              "id": "_knexa_3516y1oXgeESU4GWJLwWdReZy9A",
+                              "groupId": "_knexa_ae6a88b6-0c2a-4f9d-b3f8-f641a782ab6a",
+                              "connectorId": "community",
+                              "name": "updateWebhook",
+                              "version": "1.0.1",
+                              "imageUrl": null,
+                              "configuration": {
+                                "enableCache": false,
+                                "cacheTtlInSeconds": 0,
+                                "required": true,
+                                "validate": false,
+                                "enableRetry": false,
+                                "enableAuth": true,
+                                "authType": "NO_AUTH",
+                                "auth": {
+                                  "identifier": "$fastn_tenant_header",
+                                  "authKey": null,
+                                  "enableMultiConnection": false,
+                                  "isWorkspaceIdentifier": false,
+                                  "defaultConnectionId": null
+                                },
+                                "retry": {
+                                  "maxRetries": 1,
+                                  "maxDelayMilliseconds": 1000,
+                                  "enableConnectionErrors": false,
+                                  "retryList": [
+                                    {
+                                      "delayMilliseconds": 50,
+                                      "statusCode": 500,
+                                      "body": null
+                                    }
+                                  ]
+                                },
+                                "requestSetting": null
+                              },
+                              "next": null,
+                              "queryExecutor": null
+                            },
+                            "composite": null,
+                            "loop": null,
+                            "internalDatabase": null,
+                            "aiAction": null,
+                            "mcpClient": null,
+                            "logger": null,
+                            "downLoadFile": null,
+                            "endLoop": null,
+                            "trigger": null,
+                            "converter": null,
+                            "variables": null,
+                            "state": null,
+                            "conditional": null,
+                            "lambdaFunction": null,
+                            "outputSchema": null,
+                            "next": null,
+                            "prevStep": null,
+                            "enableDebug": false,
+                            "description": null,
+                            "debugBreakAfter": null,
+                            "configuredStepSetting": null,
+                            "filter": null,
+                            "limit": null,
+                            "splitOut": null,
+                            "aggregate": null,
+                            "merge": null,
+                            "aiAgent": null,
+                            "settings": null,
+                            "ftp": null,
+                            "summarizationChain": null,
+                            "textClassifier": null,
+                            "warnings": null,
+                            "tenantSettings": null
+                          }
+                        ],
+                        "next": null,
+                        "start": null,
+                        "queryExecutor": null
+                      },
+                      "loop": null,
+                      "internalDatabase": null,
+                      "aiAction": null,
+                      "mcpClient": null,
+                      "logger": null,
+                      "downLoadFile": null,
+                      "endLoop": null,
+                      "trigger": null,
+                      "converter": null,
+                      "variables": null,
+                      "state": null,
+                      "conditional": null,
+                      "lambdaFunction": null,
+                      "outputSchema": "{\"type\":\"object\",\"description\":\"\",\"title\":\"\",\"properties\":{\"ID\":{\"type\":\"string\"},\"Type\":{\"type\":\"string\"},\"Name\":{\"type\":\"string\"},\"IsActive\":{\"type\":\"boolean\"},\"ExternalURL\":{\"type\":\"string\"},\"ExternalAuthorizationType\":{\"type\":\"string\"},\"ExternalUserName\":{\"type\":\"string\"},\"ExternalPassword\":{\"type\":\"string\"},\"ExternalBearerToken\":{\"type\":\"string\"},\"ExternalHeaders\":{\"type\":\"array\",\"items\":{\"type\":\"object\",\"properties\":{\"Key\":{\"type\":\"string\"},\"Value\":{\"type\":\"string\"}},\"required\":[]}}},\"required\":[]}",
+                      "next": null,
+                      "prevStep": null,
+                      "enableDebug": false,
+                      "description": "This tool is designed to execute the updateWebhook operation on the Cin7 platform. It requires the JSON payload to strictly match the expected structure (key and type), otherwise, the operation will fail. Always get confirmation from the user before calling the tool.",
+                      "debugBreakAfter": 1,
+                      "configuredStepSetting": null,
+                      "filter": null,
+                      "limit": null,
+                      "splitOut": null,
+                      "aggregate": null,
+                      "merge": null,
+                      "aiAgent": null,
+                      "settings": {
+                        "failureBehavior": "FAILURE",
+                        "skipStatus": null,
+                        "errorMessage": null,
+                        "stepNote": null
+                      },
+                      "ftp": null,
+                      "summarizationChain": null,
+                      "textClassifier": null,
+                      "warnings": null,
+                      "tenantSettings": null
+                    }
+                  ],
+                  "itemSchema": "{\n\t\"type\": \"object\"\n}",
+                  "isParallel": false,
+                  "loopSize": "0",
+                  "loopStart": "0",
+                  "filePath": null,
+                  "batchSize": null,
+                  "queryExecutor": null
+                },
+                "internalDatabase": null,
+                "aiAction": null,
+                "mcpClient": null,
+                "logger": null,
+                "downLoadFile": null,
+                "endLoop": null,
+                "trigger": null,
+                "converter": null,
+                "variables": null,
+                "state": null,
+                "conditional": null,
+                "lambdaFunction": null,
+                "outputSchema": null,
+                "next": null,
+                "prevStep": null,
+                "enableDebug": false,
+                "description": null,
+                "debugBreakAfter": 1,
+                "configuredStepSetting": null,
+                "filter": null,
+                "limit": null,
+                "splitOut": null,
+                "aggregate": null,
+                "merge": null,
+                "aiAgent": null,
+                "settings": {
+                  "failureBehavior": "FAILURE",
+                  "skipStatus": null,
+                  "errorMessage": null,
+                  "stepNote": null
+                },
+                "ftp": null,
+                "summarizationChain": null,
+                "textClassifier": null,
+                "warnings": null,
+                "tenantSettings": null
+              }
+            ],
+            "itemSchema": "{\n\t\"type\": \"object\"\n}",
+            "isParallel": false,
+            "loopSize": "0",
+            "loopStart": "0",
+            "filePath": null,
+            "batchSize": "100",
+            "queryExecutor": null
+          },
+          "internalDatabase": null,
+          "aiAction": null,
+          "mcpClient": null,
+          "logger": null,
+          "downLoadFile": null,
+          "endLoop": null,
+          "trigger": null,
+          "converter": null,
+          "variables": null,
+          "state": null,
+          "conditional": null,
+          "lambdaFunction": null,
+          "outputSchema": null,
+          "next": "IfSyncConfigExists",
+          "prevStep": null,
+          "enableDebug": false,
+          "description": null,
+          "debugBreakAfter": 1,
+          "configuredStepSetting": null,
+          "filter": null,
+          "limit": null,
+          "splitOut": null,
+          "aggregate": null,
+          "merge": null,
+          "aiAgent": null,
+          "settings": {
+            "failureBehavior": "FAILURE",
+            "skipStatus": null,
+            "errorMessage": null,
+            "stepNote": null
+          },
+          "ftp": null,
+          "summarizationChain": null,
+          "textClassifier": null,
+          "warnings": null,
+          "tenantSettings": null
+        }
+      ]
+    },
+    "types": [],
+    "tests": null,
+    "hasActionType": true,
+    "metaData": {
+      "enableLogs": false,
+      "isAsync": false,
+      "hasSecret": true,
+      "enableMultitenant": false,
+      "enableValidation": false,
+      "runAsWorkflowOnTimeout": false,
+      "architecture": "REST",
+      "isCustomAuthenticationEnabled": null,
+      "requiredAccessRole": null,
+      "isNotificationEnabled": false,
+      "flowType": "API",
+      "jobMemoryLimit": 4096,
+      "jobTimeOut": null,
+      "jobCpuLimit": "1",
+      "isConfigured": null,
+      "configurationFlows": null,
+      "invocationMethod": "API_REQUEST",
+      "priority": null,
+      "triggerType": null,
+      "schedule": null,
+      "triggerApp": null
+    },
+    "comment": null,
+    "labels": [
+      "Cin7xTrackstar"
+    ],
+    "resourceType": "EXTERNAL",
+    "deleted": null,
+    "webhookId": null,
+    "webhook": null,
+    "deployedBy": null,
+    "createdby": null
+  }
+]

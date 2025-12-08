@@ -11,6 +11,9 @@ function handler(params) {
       // Get location mapping from variables
       const locationMapping = params.data?.var?.locationMapping || [];
 
+      // Check if this is a direct trigger (not a change-based trigger)
+      const isDirectTrigger = params.data?.var?.trigger === null || params.data?.var?.trigger === undefined;
+
       // Helper function to get warehouse name from ID
       function getWarehouseName(warehouseId) {
           if (!warehouseId || !locationMapping || locationMapping.length === 0) {
@@ -50,20 +53,22 @@ function handler(params) {
           }
       };
 
-      // If no previous_attributes, return just the ID (no changes to update)
-      if (!previous_attributes) {
+      // If no previous_attributes and not a direct trigger, return just the ID (no changes to update)
+      if (!previous_attributes && !isDirectTrigger) {
           return payload;
       }
 
       // Build a Set of changed fields using for...in loop (the only method that works)
       const changedFields = new Set();
-      for (let key in previous_attributes) {
-          changedFields.add(key);
+      if (previous_attributes) {
+          for (let key in previous_attributes) {
+              changedFields.add(key);
+          }
       }
 
-      // Helper: Check if field was changed
+      // Helper: Check if field was changed or if we're in direct trigger mode
       function wasFieldChanged(fieldPath) {
-          return changedFields.has(fieldPath);
+          return isDirectTrigger || changedFields.has(fieldPath);
       }
 
       // Map only changed Trackstar fields → Cin7 fields
