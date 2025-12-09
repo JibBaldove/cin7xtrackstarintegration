@@ -8,6 +8,7 @@ function handler(params) {
           const tenantConfig = params.data?.var.tenantConfig || {};
           const connectionId = params.data.var.connectionId;
           let warehouseId = params.data?.var.mappedWarehouse;
+          const entityMapping = params.data.var.entityMapping;
 
           // Find substitutionList for current connection
           const locationMapping = tenantConfig.locationMapping || [];
@@ -40,6 +41,51 @@ function handler(params) {
           // Append 'Z' for UTC timezone
           return datetime + 'Z';
       };
+
+          // Helper function to get nested value from object using dot notation
+          const getNestedValue = (obj, path) => {
+              if (!path || !obj) return undefined;
+              return path.split('.').reduce((current, key) => current?.[key], obj);
+          };
+
+          // Helper function to apply transformation to a value
+          const applyTransform = (value, transform) => {
+              if (!transform || value === undefined || value === null) return value;
+
+              switch (transform.toLowerCase()) {
+                  case 'uppercase':
+                      return String(value).toUpperCase();
+                  case 'lowercase':
+                      return String(value).toLowerCase();
+                  default:
+                      return value;
+              }
+          };
+
+          // Helper function to apply entity mapping config to source data
+          const applyEntityMapping = (sourceData, mappingConfig, cin7Data) => {
+              if (!mappingConfig || !Array.isArray(mappingConfig.mapping)) {
+                  return sourceData;
+              }
+
+              // Only process if entity is "sale"
+              if (mappingConfig.entity !== 'sale') {
+                  return sourceData;
+              }
+
+              // Apply each mapping
+              mappingConfig.mapping.forEach(map => {
+                  const cin7Value = getNestedValue(cin7Data, map.cin7);
+                  const transformedValue = applyTransform(cin7Value, map.transform);
+
+                  if (transformedValue !== undefined) {
+                      sourceData[map.trackstar] = transformedValue;
+                  }
+              });
+
+              return sourceData;
+          };
+
           // Helper function to parse DisplayAddressLine2 format: "City State/Region Zip/Postcode Country"
           const parseDisplayAddressLine2 = (displayLine) => {
             if (!displayLine) return {};
@@ -256,6 +302,9 @@ function handler(params) {
               };
             }),
           };
+
+          // Apply entity mapping if config exists (overwrites default mappings)
+          applyEntityMapping(sourceData, entityMapping, data);
 
         const fillFromSchema = (schemaObj, dataObj, parentPath = '') => {
             const result = {};
