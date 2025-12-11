@@ -1,0 +1,28 @@
+{
+  "name": "cin7-trackstar-integration-tests",
+  "version": "1.0.0",
+  "description": "Playwright API tests for Cin7 and Trackstar webhook integration",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:sales": "playwright test tests/sales-order.spec.js",
+    "test:purchase": "playwright test tests/purchase-order.spec.js",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug"
+  },
+  "keywords": [
+    "playwright",
+    "cin7",
+    "trackstar",
+    "integration",
+    "testing"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.0"
+  }
+}
