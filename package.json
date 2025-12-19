@@ -1,0 +1,32 @@
+{
+  "name": "cin7-trackstar-integration",
+  "version": "1.0.0",
+  "description": "Cin7 and Trackstar integration with admin UI for tenant config management",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared",
+    "playwright-tests"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "npm run build:shared && npm run build:frontend",
+    "build:shared": "cd shared && npm run build",
+    "build:frontend": "cd frontend && npm run build",
+    "test": "cd playwright-tests && npm test"
+  },
+  "keywords": [
+    "cin7",
+    "trackstar",
+    "integration",
+    "webhook"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}

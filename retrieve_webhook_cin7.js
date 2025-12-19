@@ -11,31 +11,31 @@
       const stage = "LIVE";
       const apiKey = params.data.var.apiKey || "9e8a14d0-b3c6-4a47-b821-126c56cce6da";
 
-      // Build ExternalHeaders array
+      // Build ExternalHeaders array (matching working curl request)
       const externalHeaders = [
         {
-          Key: "x-fastn-space-tenantId",  // ← Changed to capital I
-          Value: tenantId
+          Key: "x-fastn-api-key",
+          Value: apiKey
+        },
+        {
+          Key: "Content-Type",
+          Value: "application/json"
         },
         {
           Key: "x-fastn-space-id",
           Value: spaceId
         },
         {
-          Key: "x-fastn-space-connection-id",
-          Value: connectionId
+          Key: "x-fastn-space-tenantid",
+          Value: tenantId
         },
         {
           Key: "stage",
           Value: stage
         },
         {
-          Key: "x-app-source",
-          Value: "cin7"
-        },
-        {
-          Key: "x-fastn-api-key",
-          Value: apiKey
+          Key: "x-fastn-custom-auth",
+          Value: "true"
         }
       ];
 

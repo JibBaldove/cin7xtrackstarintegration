@@ -11,14 +11,14 @@ test.describe('Sales Order Webhook Tests', () => {
   const CLIENT_ID = 'd0f8c7f3-69d3-403c-90a0-17c8857e095f';
   const WEBHOOK_PATH = `/api/v1/clients/${CLIENT_ID}/webhooks/sync_salesorder_cin7_trackstar_v2`;
 
-  // Authentication headers (from retrieve_webhook_cin7.js configuration)
+  // Authentication headers (from working curl request)
   const AUTH_HEADERS = {
-    'x-fastn-space-tenantid': process.env.TENANT_ID || 'test-tenant-id',
+    'x-fastn-api-key': process.env.API_KEY || '9e8a14d0-b3c6-4a47-b821-126c56cce6da',
+    'Content-Type': 'application/json',
     'x-fastn-space-id': process.env.SPACE_ID || CLIENT_ID,
-    'x-fastn-space-connection-id': process.env.CONNECTION_ID || 'default',
+    'x-fastn-space-tenantid': process.env.TENANT_ID || 'jb-test',
     'stage': 'LIVE',
-    'x-app-source': 'cin7',
-    'x-fastn-api-key': process.env.API_KEY || '9e8a14d0-b3c6-4a47-b821-126c56cce6da'
+    'x-fastn-custom-auth': 'true'
   };
 
   /**
