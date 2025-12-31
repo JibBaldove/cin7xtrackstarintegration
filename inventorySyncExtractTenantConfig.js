@@ -10,7 +10,7 @@
     let isSyncActive = false;
     let quantityType = 'sellable'; // default
     let locationScope = 'mapped'; // default
-    let warehouses = {};
+    let warehouses = [];
 
     for (const entityConfig of syncConfig) {
       if (entityConfig.entity === SYNC_ENTITY) {
@@ -24,7 +24,10 @@
     // Find warehouses for the specific connectionId
     for (const mapping of locationMapping) {
       if (mapping.connectionId === connectionId) {
-        warehouses = mapping.warehouses || {};
+        const warehousesData = mapping.warehouses || {};
+      warehouses = Array.isArray(warehousesData)
+        ? warehousesData
+        : Object.entries(warehousesData).map(([id, warehouseId]) => ({ id, warehouseId }));
         break;
       }
     }
