@@ -6,7 +6,7 @@
       "status": "Active",
       "webhook": [
         {
-          "url": "https://live.fastn.ai/api/v1/clients/d0f8c7f3-69d3-403c-90a0-17c8857e095f/webhooks/sync_salesorder_cin7_trackstar",
+          "url": "https://live.fastn.ai/api/v1/clients/d0f8c7f3-69d3-403c-90a0-17c8857e095f/webhooks/sync_salesorder_cin7_trackstar_v2",
           "event": "Sale/PickAuthorised",
           "status": "Active"
         }
@@ -27,36 +27,36 @@
           "status": "Active"
         }
       ]
+    },
+    {
+      "entity": "inventory",
+      "status": "Active",
+      "quantityType": "onhand",
+      "locationScope": "mapped",
+      "autoAcceptThreshold": 0
+    },
+    {
+      "entity": "transfer",
+      "status": "Active"
+    },
+    {
+      "entity": "product",
+      "status": "Active"
     }
   ],
   "locationMapping": [
-    {
-      "warehouses": {
-        "Australian Fulfillment Center (Sydney; 3PL)": "Next3PL"
-      },
-      "connectionId": "earthbreeze-au"
-    },
-    {
-      "warehouses": {
-        "Canadian Fulfillment Center (3PL)": "0a78bf12-bead-4b42-94da-eb8a5fdd0b52"
-      },
-      "connectionId": "earthbreeze-ca",
-      "substitutionList": [
         {
-          "mapping": {
-            "Canada": "CA",
-            "Philippines": "PH",
-            "United States": "US"
-          },
-          "listName": "country"
+          "warehouses": [
+            {
+              "cin7WarehouseId": "cin7-wh-123",
+              "trackstarLocationId": "55ab0c7f-..."
+            }
+          ],
+          "connectionId": "cin7xnext3pl"
         }
-      ]
-    },
-    {
-      "warehouses": {
-        "US-Stord": "944fc263-a8e9-4e89-9cbf-bdd5ad3afa04"
-      },
-      "connectionId": "earthbreeze-us"
-    }
+  ],
+  "notificationRecipient": [
+    "jib@four13.co",
+    "jibbaldove@gmail.com"
   ]
 }

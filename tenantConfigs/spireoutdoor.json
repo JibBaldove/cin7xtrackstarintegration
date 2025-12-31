@@ -9,6 +9,11 @@
           "url": "https://live.fastn.ai/api/v1/clients/d0f8c7f3-69d3-403c-90a0-17c8857e095f/webhooks/sync_salesorder_cin7_trackstar",
           "event": "Sale/PickAuthorised",
           "status": "Active"
+        },
+        {
+          "url": "https://live.fastn.ai/api/v1/clients/d0f8c7f3-69d3-403c-90a0-17c8857e095f/webhooks/sync_salesorder_cin7_trackstar_v2",
+          "event": "Sale/PickAuthorised",
+          "status": "Inactive"
         }
       ]
     },
@@ -32,31 +37,25 @@
   "locationMapping": [
     {
       "warehouses": {
-        "Australian Fulfillment Center (Sydney; 3PL)": "Next3PL"
+        "NRI-EAST": "MA",
+        "NRI-WEST": "VB"
       },
-      "connectionId": "earthbreeze-au"
-    },
-    {
-      "warehouses": {
-        "Canadian Fulfillment Center (3PL)": "0a78bf12-bead-4b42-94da-eb8a5fdd0b52"
-      },
-      "connectionId": "earthbreeze-ca",
-      "substitutionList": [
-        {
-          "mapping": {
-            "Canada": "CA",
-            "Philippines": "PH",
-            "United States": "US"
-          },
-          "listName": "country"
-        }
-      ]
-    },
-    {
-      "warehouses": {
-        "US-Stord": "944fc263-a8e9-4e89-9cbf-bdd5ad3afa04"
-      },
-      "connectionId": "earthbreeze-us"
+      "connectionId": "default"
     }
+  ],
+  "notificationRecipient": [
+    "dorothee@spireoutdoorgroup.com",
+    "jib@four13.co"
   ]
 }
+
+// Entity Mapping
+//{
+//   "entity": "sale",
+//   "mapping": [
+//     {
+//       "cin7": "SalesRepresentative",
+//       "trackstar": "order_type"
+//     }
+//   ]
+// }

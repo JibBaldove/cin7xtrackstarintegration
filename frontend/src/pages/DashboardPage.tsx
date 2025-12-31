@@ -1,17 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../api/client';
 import { SyncConfigEditor } from '../components/SyncConfigEditor';
 import { LocationMappingEditor } from '../components/LocationMappingEditor';
+import { SettingsEditor } from '../components/SettingsEditor';
+import type { TenantConfig, ConfigOptions, Connection, LocationMapping } from '../types/config';
 
 export function DashboardPage() {
-  const { tenantId, logout } = useAuth();
-  const [config, setConfig] = useState<any>(null);
+  const [config, setConfig] = useState<TenantConfig | null>(null);
+  const [options, setOptions] = useState<ConfigOptions>({ cin7Warehouses: [], connections: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
+  const [savingApiKey, setSavingApiKey] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [activeTab, setActiveTab] = useState<'sync' | 'location'>('sync');
+  const [activeTab, setActiveTab] = useState<'sync' | 'location' | 'settings'>('sync');
 
   useEffect(() => {
     loadConfig();
@@ -22,7 +24,52 @@ export function DashboardPage() {
       setLoading(true);
       setError('');
       const response = await apiClient.getTenantConfig();
-      setConfig(response.data);
+      // Handle nested config structure
+      const configData = response.config || response;
+      setConfig(configData);
+
+      // Extract and transform options if available
+      if (response.options) {
+        // Transform cin7Warehouses from { ID, Name } to { id, name }
+        const cin7Warehouses = (response.options.cin7Warehouses || []).map((wh: any) => ({
+          id: wh.ID,
+          name: wh.Name
+        }));
+
+        // Transform connections and add display names
+        let connections = (response.options.connections || []).map((conn: any) => {
+          // Generate friendly name from connection ID
+          const name = conn.id === 'default'
+            ? 'Default Connection'
+            : conn.id
+                .replace(/([a-z])([A-Z])/g, '$1 $2') // camelCase to spaces
+                .replace(/[_-]/g, ' ') // underscores/hyphens to spaces
+                .split(' ')
+                .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+                .join(' ');
+
+          return {
+            id: conn.id,
+            name: name,
+            locations: conn.locations || []
+          };
+        });
+
+        // Filter out "default" if there are other connections
+        // Exception: keep "default" if it's already being used in existing locationMapping
+        const nonDefaultConnections = connections.filter((c: Connection) => c.id !== 'default');
+        const isDefaultInUse = configData.locationMapping?.some((loc: LocationMapping) => loc.connectionId === 'default');
+
+        if (nonDefaultConnections.length > 0 && !isDefaultInUse) {
+          connections = nonDefaultConnections;
+        }
+        // Otherwise keep default (if it's the only connection or already in use)
+
+        setOptions({
+          cin7Warehouses,
+          connections
+        });
+      }
     } catch (err) {
       setError('Failed to load configuration');
       console.error(err);
@@ -32,11 +79,17 @@ export function DashboardPage() {
   };
 
   const handleSave = async () => {
+    if (!config) return;
+
     try {
       setSaving(true);
       setError('');
       setSuccessMessage('');
-      await apiClient.updateTenantConfig(config);
+
+      // Exclude API key from config update
+      const { apiKey, hasApiKey, tenantId: _, ...configUpdate } = config;
+      await apiClient.updateTenantConfig(configUpdate);
+
       setSuccessMessage('Configuration saved successfully!');
       setTimeout(() => setSuccessMessage(''), 3000);
     } catch (err) {
@@ -44,6 +97,28 @@ export function DashboardPage() {
       console.error(err);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleApiKeySave = async (newApiKey: string) => {
+    try {
+      setSavingApiKey(true);
+      setError('');
+      setSuccessMessage('');
+
+      await apiClient.updateApiKey(newApiKey);
+
+      // Reload config to get the new masked API key
+      await loadConfig();
+
+      setSuccessMessage('API Key updated successfully!');
+      setTimeout(() => setSuccessMessage(''), 3000);
+    } catch (err) {
+      setError('Failed to update API key');
+      console.error(err);
+      throw err; // Re-throw so SettingsEditor can handle it
+    } finally {
+      setSavingApiKey(false);
     }
   };
 
@@ -56,37 +131,7 @@ export function DashboardPage() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      <header style={{
-        backgroundColor: 'white',
-        borderBottom: '1px solid #ddd',
-        padding: '1rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <div>
-          <h1 style={{ margin: 0, fontSize: '1.5rem' }}>Tenant Configuration</h1>
-          <p style={{ margin: '0.25rem 0 0', color: '#666', fontSize: '0.875rem' }}>
-            Tenant: <strong>{tenantId}</strong>
-          </p>
-        </div>
-        <button
-          onClick={logout}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#dc3545',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Logout
-        </button>
-      </header>
-
-      <main style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+    <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
         {error && (
           <div style={{
             backgroundColor: '#fee',
@@ -151,6 +196,20 @@ export function DashboardPage() {
             >
               Location Mapping
             </button>
+            <button
+              onClick={() => setActiveTab('settings')}
+              style={{
+                flex: 1,
+                padding: '1rem',
+                border: 'none',
+                backgroundColor: activeTab === 'settings' ? 'white' : '#f5f5f5',
+                borderBottom: activeTab === 'settings' ? '2px solid #007bff' : 'none',
+                cursor: 'pointer',
+                fontWeight: activeTab === 'settings' ? '600' : 'normal'
+              }}
+            >
+              Settings
+            </button>
           </div>
 
           <div style={{ padding: '2rem' }}>
@@ -165,6 +224,21 @@ export function DashboardPage() {
               <LocationMappingEditor
                 locationMapping={config.locationMapping}
                 onChange={(newLocationMapping) => setConfig({ ...config, locationMapping: newLocationMapping })}
+                cin7Warehouses={options.cin7Warehouses}
+                connections={options.connections}
+              />
+            )}
+
+            {activeTab === 'settings' && config && (
+              <SettingsEditor
+                apiKey={config.apiKey || ''}
+                hasApiKey={config.hasApiKey || false}
+                notificationRecipient={config.notificationRecipient || []}
+                onNotificationRecipientChange={(recipients) =>
+                  setConfig({ ...config, notificationRecipient: recipients })
+                }
+                onApiKeySave={handleApiKeySave}
+                savingApiKey={savingApiKey}
               />
             )}
           </div>
@@ -206,7 +280,6 @@ export function DashboardPage() {
             {saving ? 'Saving...' : 'Save Changes'}
           </button>
         </div>
-      </main>
     </div>
   );
 }

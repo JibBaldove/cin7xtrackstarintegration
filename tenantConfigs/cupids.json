@@ -27,36 +27,36 @@
           "status": "Active"
         }
       ]
+    },
+    {
+      "entity": "inventory",
+      "status": "Active"
+    },
+    {
+      "entity": "transfer",
+      "status": "Active"
+    },
+    {
+      "entity": "product",
+      "status": "Active"
     }
   ],
   "locationMapping": [
     {
       "warehouses": {
-        "Australian Fulfillment Center (Sydney; 3PL)": "Next3PL"
+        "Shipbob Fresno CA": "29"
       },
-      "connectionId": "earthbreeze-au"
+      "connectionId": "default"
     },
     {
       "warehouses": {
-        "Canadian Fulfillment Center (3PL)": "0a78bf12-bead-4b42-94da-eb8a5fdd0b52"
+        "Shipbob Fresno CA": "29"
       },
-      "connectionId": "earthbreeze-ca",
-      "substitutionList": [
-        {
-          "mapping": {
-            "Canada": "CA",
-            "Philippines": "PH",
-            "United States": "US"
-          },
-          "listName": "country"
-        }
-      ]
-    },
-    {
-      "warehouses": {
-        "US-Stord": "944fc263-a8e9-4e89-9cbf-bdd5ad3afa04"
-      },
-      "connectionId": "earthbreeze-us"
+      "connectionId": "cupids-test"
     }
+  ],
+  "notificationRecipient": [
+    "jib@four13.co",
+    "talaine@four13.co"
   ]
 }

@@ -1,15 +1,4 @@
-
-interface Webhook {
-  url: string;
-  event: string;
-  status: 'Active' | 'Inactive';
-}
-
-interface SyncConfig {
-  entity: 'sale' | 'purchase' | 'inventory';
-  status: 'Active' | 'Inactive';
-  webhook: Webhook[];
-}
+import type { SyncConfig, Webhook } from '../types/config';
 
 interface Props {
   syncConfig: SyncConfig[];
@@ -25,7 +14,7 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
 
   const updateWebhook = (syncIndex: number, webhookIndex: number, field: keyof Webhook, value: any) => {
     const updated = [...syncConfig];
-    const webhooks = [...updated[syncIndex].webhook];
+    const webhooks = [...(updated[syncIndex].webhook || [])];
     webhooks[webhookIndex] = { ...webhooks[webhookIndex], [field]: value };
     updated[syncIndex] = { ...updated[syncIndex], webhook: webhooks };
     onChange(updated);
@@ -33,17 +22,20 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
 
   const addWebhook = (syncIndex: number) => {
     const updated = [...syncConfig];
-    updated[syncIndex].webhook.push({
+    const webhooks = [...(updated[syncIndex].webhook || [])];
+    webhooks.push({
       url: '',
       event: '',
       status: 'Active'
     });
+    updated[syncIndex] = { ...updated[syncIndex], webhook: webhooks };
     onChange(updated);
   };
 
   const removeWebhook = (syncIndex: number, webhookIndex: number) => {
     const updated = [...syncConfig];
-    updated[syncIndex].webhook = updated[syncIndex].webhook.filter((_, i) => i !== webhookIndex);
+    const webhooks = (updated[syncIndex].webhook || []).filter((_, i) => i !== webhookIndex);
+    updated[syncIndex] = { ...updated[syncIndex], webhook: webhooks };
     onChange(updated);
   };
 
@@ -53,6 +45,11 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
       status: 'Active',
       webhook: []
     }]);
+  };
+
+  // Check if entity has webhooks
+  const hasWebhooks = (entity: string) => {
+    return ['sale', 'purchase'].includes(entity);
   };
 
   const removeSyncConfig = (index: number) => {
@@ -125,6 +122,8 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
                 <option value="sale">Sale</option>
                 <option value="purchase">Purchase</option>
                 <option value="inventory">Inventory</option>
+                <option value="transfer">Transfer</option>
+                <option value="product">Product</option>
               </select>
             </div>
 
@@ -148,9 +147,100 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
             </div>
           </div>
 
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <label style={{ fontWeight: '500' }}>Webhooks</label>
+          {/* Inventory-specific fields */}
+          {sync.entity === 'inventory' && (
+            <div style={{
+              backgroundColor: '#f0f8ff',
+              border: '1px solid #b3d9ff',
+              borderRadius: '4px',
+              padding: '1rem',
+              marginBottom: '1rem'
+            }}>
+              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.875rem', color: '#0066cc' }}>
+                Inventory Settings
+              </h4>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', fontWeight: '500' }}>
+                    Quantity Type
+                  </label>
+                  <select
+                    value={sync.quantityType || 'onhand'}
+                    onChange={(e) => updateSyncConfig(syncIndex, 'quantityType', e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    <option value="onhand">On Hand</option>
+                    <option value="available">Available</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', fontWeight: '500' }}>
+                    Location Scope
+                  </label>
+                  <select
+                    value={sync.locationScope || 'mapped'}
+                    onChange={(e) => updateSyncConfig(syncIndex, 'locationScope', e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    <option value="mapped">Mapped Only</option>
+                    <option value="all">All Locations</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', fontWeight: '500' }}>
+                    Auto Accept Threshold
+                  </label>
+                  <input
+                    type="number"
+                    value={sync.autoAcceptThreshold ?? 0}
+                    onChange={(e) => updateSyncConfig(syncIndex, 'autoAcceptThreshold', parseInt(e.target.value) || 0)}
+                    min="0"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '0.875rem',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#666' }}>
+                <p style={{ margin: '0.25rem 0' }}>
+                  <strong>Quantity Type:</strong> Choose between on-hand (physical inventory) or available (after commitments)
+                </p>
+                <p style={{ margin: '0.25rem 0' }}>
+                  <strong>Location Scope:</strong> Sync only mapped warehouses or all locations
+                </p>
+                <p style={{ margin: '0.25rem 0' }}>
+                  <strong>Auto Accept:</strong> Automatically accept inventory updates with differences below this threshold
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Webhooks section - only for sale and purchase */}
+          {hasWebhooks(sync.entity) && (
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                <label style={{ fontWeight: '500' }}>Webhooks</label>
               <button
                 onClick={() => addWebhook(syncIndex)}
                 style={{
@@ -167,7 +257,7 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
               </button>
             </div>
 
-            {sync.webhook.map((webhook, webhookIndex) => (
+            {(sync.webhook || []).map((webhook, webhookIndex) => (
               <div
                 key={webhookIndex}
                 style={{
@@ -259,7 +349,22 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
                 </div>
               </div>
             ))}
-          </div>
+            </div>
+          )}
+
+          {/* Message for entities without webhooks */}
+          {!hasWebhooks(sync.entity) && (
+            <div style={{
+              backgroundColor: '#fffbf0',
+              border: '1px solid #ffe58f',
+              borderRadius: '4px',
+              padding: '0.75rem',
+              fontSize: '0.875rem',
+              color: '#8c6d1f'
+            }}>
+              ℹ️ This entity type does not use webhooks. Configuration is applied directly.
+            </div>
+          )}
         </div>
       ))}
 

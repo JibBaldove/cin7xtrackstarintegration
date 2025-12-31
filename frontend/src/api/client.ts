@@ -1,4 +1,5 @@
 import axios, { type AxiosInstance } from 'axios';
+import type { TenantConfigUpdate } from '../types/config';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://live.fastn.ai/api/v1';
 
@@ -99,11 +100,98 @@ export class ApiClient {
     return response.data;
   }
 
-  async updateTenantConfig(config: any) {
+  async updateTenantConfig(config: TenantConfigUpdate) {
     if (!this.tenantId) {
       throw new Error('Tenant ID not set');
     }
-    const response = await this.client.put(`/tenants/${this.tenantId}/config`, config);
+    // Wrap entire payload in input object
+    const payload = {
+      input: {
+        updateType: 'config',
+        config
+      }
+    };
+    const response = await this.client.post('/cin7_trackstar_config', payload);
+    return response.data;
+  }
+
+  async updateApiKey(apiKey: string) {
+    if (!this.tenantId) {
+      throw new Error('Tenant ID not set');
+    }
+    // Wrap entire payload in input object
+    const payload = {
+      input: {
+        updateType: 'credential',
+        config: { apiKey }
+      }
+    };
+    const response = await this.client.post('/cin7_trackstar_config', payload);
+    return response.data;
+  }
+
+  async getSyncHistory(entity?: string, minDate?: string) {
+    if (!this.tenantId) {
+      throw new Error('Tenant ID not set');
+    }
+    const payload: any = {
+      input: {}
+    };
+    if (entity) {
+      payload.input.entity = entity;
+    }
+    if (minDate) {
+      payload.input.minDate = minDate;
+    }
+    const response = await this.client.post('/get_cin7_trackstar_syncHistory', payload);
+    return response.data;
+  }
+
+  async resyncSale(cin7Id: string, connectionId?: string) {
+    if (!this.tenantId) {
+      throw new Error('Tenant ID not set');
+    }
+    const headers: any = {
+      'x-fastn-space-connection-id': connectionId || 'default'
+    };
+    const payload = {
+      input: {
+        SaleID: cin7Id
+      }
+    };
+    const response = await this.client.post('/sync_cin7_trackstar_salesOrder_v2', payload, { headers });
+    return response.data;
+  }
+
+  async resyncPurchase(cin7Id: string, connectionId?: string) {
+    if (!this.tenantId) {
+      throw new Error('Tenant ID not set');
+    }
+    const headers: any = {
+      'x-fastn-space-connection-id': connectionId || 'default'
+    };
+    const payload = {
+      input: {
+        PurchaseID: cin7Id
+      }
+    };
+    const response = await this.client.post('/sync_cin7_trackstar_purchaseOrder', payload, { headers });
+    return response.data;
+  }
+
+  async resyncTransfer(cin7Id: string, connectionId?: string) {
+    if (!this.tenantId) {
+      throw new Error('Tenant ID not set');
+    }
+    const headers: any = {
+      'x-fastn-space-connection-id': connectionId || 'default'
+    };
+    const payload = {
+      input: {
+        TransferID: cin7Id
+      }
+    };
+    const response = await this.client.post('/sync_cin7_trackstar_transfer', payload, { headers });
     return response.data;
   }
 }

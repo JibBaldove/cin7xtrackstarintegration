@@ -1,81 +1,68 @@
-
-interface WarehouseMapping {
-  [warehouseName: string]: string;
-}
-
-interface SubstitutionMapping {
-  [key: string]: string;
-}
-
-interface SubstitutionList {
-  mapping: SubstitutionMapping;
-  listName: string;
-}
-
-interface LocationMapping {
-  warehouses: WarehouseMapping;
-  connectionId: string;
-  substitutionList?: SubstitutionList[];
-}
+import type { LocationMapping, SubstitutionList, Cin7Warehouse, Connection } from '../types/config';
+import { SearchableSelect } from './SearchableSelect';
 
 interface Props {
   locationMapping: LocationMapping[];
   onChange: (locationMapping: LocationMapping[]) => void;
+  cin7Warehouses: Cin7Warehouse[];
+  connections: Connection[];
 }
 
-export function LocationMappingEditor({ locationMapping, onChange }: Props) {
+export function LocationMappingEditor({
+  locationMapping,
+  onChange,
+  cin7Warehouses,
+  connections
+}: Props) {
   const updateLocationMapping = (index: number, field: keyof LocationMapping, value: any) => {
     const updated = [...locationMapping];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
   };
 
-  const updateWarehouse = (locationIndex: number, warehouseName: string, value: string) => {
-    const updated = [...locationMapping];
-    const warehouses = { ...updated[locationIndex].warehouses };
-
-    if (value) {
-      warehouses[warehouseName] = value;
-    } else {
-      delete warehouses[warehouseName];
-    }
-
-    updated[locationIndex] = { ...updated[locationIndex], warehouses };
-    onChange(updated);
-  };
-
   const addWarehouse = (locationIndex: number) => {
     const updated = [...locationMapping];
-    const warehouses = { ...updated[locationIndex].warehouses };
-    warehouses['New Warehouse'] = '';
+    const warehouses = [...updated[locationIndex].warehouses];
+    warehouses.push({
+      cin7WarehouseId: '',
+      cin7WarehouseName: '',
+      trackstarLocationId: ''
+    });
     updated[locationIndex] = { ...updated[locationIndex], warehouses };
     onChange(updated);
   };
 
-  const removeWarehouse = (locationIndex: number, warehouseName: string) => {
+  const updateWarehouseMapping = (
+    locationIndex: number,
+    warehouseIndex: number,
+    field: keyof import('../types/config').WarehouseMapping,
+    value: string
+  ) => {
     const updated = [...locationMapping];
-    const warehouses = { ...updated[locationIndex].warehouses };
-    delete warehouses[warehouseName];
+    const warehouses = [...updated[locationIndex].warehouses];
+    warehouses[warehouseIndex] = { ...warehouses[warehouseIndex], [field]: value };
     updated[locationIndex] = { ...updated[locationIndex], warehouses };
     onChange(updated);
   };
 
-  const renameWarehouse = (locationIndex: number, oldName: string, newName: string) => {
+  const updateCin7Warehouse = (locationIndex: number, warehouseIndex: number, cin7WarehouseId: string) => {
     const updated = [...locationMapping];
-    const warehouses = { ...updated[locationIndex].warehouses };
-    const value = warehouses[oldName];
-    delete warehouses[oldName];
-    warehouses[newName] = value;
+    const warehouses = [...updated[locationIndex].warehouses];
+    const selectedWarehouse = cin7Warehouses.find(w => w.id === cin7WarehouseId);
+    warehouses[warehouseIndex] = {
+      ...warehouses[warehouseIndex],
+      cin7WarehouseId: cin7WarehouseId,
+      cin7WarehouseName: selectedWarehouse?.name || ''
+    };
     updated[locationIndex] = { ...updated[locationIndex], warehouses };
     onChange(updated);
   };
 
-  const addLocationMapping = () => {
-    onChange([...locationMapping, {
-      warehouses: {},
-      connectionId: '',
-      substitutionList: []
-    }]);
+  const removeWarehouse = (locationIndex: number, warehouseIndex: number) => {
+    const updated = [...locationMapping];
+    const warehouses = updated[locationIndex].warehouses.filter((_, i) => i !== warehouseIndex);
+    updated[locationIndex] = { ...updated[locationIndex], warehouses };
+    onChange(updated);
   };
 
   const removeLocationMapping = (index: number) => {
@@ -139,81 +126,87 @@ export function LocationMappingEditor({ locationMapping, onChange }: Props) {
     onChange(updated);
   };
 
+  // Get list of connections that don't have mappings yet
+  const usedConnectionIds = locationMapping.map(loc => loc.connectionId);
+  const availableConnections = connections.filter(conn => !usedConnectionIds.includes(conn.id));
+
   return (
     <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-        <h2 style={{ margin: 0 }}>Location Mapping</h2>
-        <button
-          onClick={addLocationMapping}
-          style={{
-            padding: '0.5rem 1rem',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          + Add Location
-        </button>
+      <div style={{ marginBottom: '1.5rem' }}>
+        <h2 style={{ margin: '0 0 0.5rem 0' }}>Location Mapping</h2>
+        <p style={{ margin: 0, fontSize: '0.875rem', color: '#666' }}>
+          Configure warehouse mappings for each connection. Cin7 warehouses will be mapped to Trackstar locations.
+        </p>
       </div>
 
-      {locationMapping.map((location, locationIndex) => (
-        <div
-          key={locationIndex}
-          style={{
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            padding: '1.5rem',
-            marginBottom: '1rem',
-            backgroundColor: '#fafafa'
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
-            <h3 style={{ margin: 0 }}>Location {locationIndex + 1}</h3>
-            <button
-              onClick={() => removeLocationMapping(locationIndex)}
-              style={{
-                padding: '0.25rem 0.75rem',
-                backgroundColor: '#dc3545',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.875rem'
-              }}
-            >
-              Remove
-            </button>
+      {/* Show available connections if any */}
+      {availableConnections.length > 0 && (
+        <div style={{
+          backgroundColor: '#e7f3ff',
+          border: '1px solid #b3d9ff',
+          borderRadius: '4px',
+          padding: '1rem',
+          marginBottom: '1.5rem'
+        }}>
+          <div style={{ marginBottom: '0.75rem', fontWeight: '500', fontSize: '0.875rem' }}>
+            Available Connections to Configure:
           </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-              Connection ID
-            </label>
-            <input
-              type="text"
-              value={location.connectionId}
-              onChange={(e) => updateLocationMapping(locationIndex, 'connectionId', e.target.value)}
-              placeholder="e.g., earthbreeze-us"
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                boxSizing: 'border-box'
-              }}
-            />
-          </div>
-
-          <div style={{ marginBottom: '1rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-              <label style={{ fontWeight: '500' }}>Warehouses</label>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+            {availableConnections.map((conn) => (
               <button
-                onClick={() => addWarehouse(locationIndex)}
+                key={conn.id}
+                onClick={() => {
+                  onChange([...locationMapping, {
+                    warehouses: [],
+                    connectionId: conn.id,
+                    substitutionList: []
+                  }]);
+                }}
+                style={{
+                  padding: '0.5rem 1rem',
+                  backgroundColor: '#007bff',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: '500'
+                }}
+              >
+                + Configure {conn.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {locationMapping.map((location, locationIndex) => {
+        const selectedConnection = connections.find(conn => conn.id === location.connectionId);
+        const connectionName = selectedConnection?.name || 'Unknown Connection';
+
+        return (
+          <div
+            key={locationIndex}
+            style={{
+              border: '2px solid #007bff',
+              borderRadius: '8px',
+              padding: '1.5rem',
+              marginBottom: '1rem',
+              backgroundColor: '#fafafa'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '1rem' }}>
+              <div>
+                <h3 style={{ margin: '0 0 0.25rem 0', fontSize: '1.125rem' }}>{connectionName}</h3>
+                <div style={{ fontSize: '0.75rem', color: '#666', fontFamily: 'monospace' }}>
+                  ID: {location.connectionId || 'Not set'}
+                </div>
+              </div>
+              <button
+                onClick={() => removeLocationMapping(locationIndex)}
                 style={{
                   padding: '0.25rem 0.75rem',
-                  backgroundColor: '#28a745',
+                  backgroundColor: '#dc3545',
                   color: 'white',
                   border: 'none',
                   borderRadius: '4px',
@@ -221,63 +214,156 @@ export function LocationMappingEditor({ locationMapping, onChange }: Props) {
                   fontSize: '0.875rem'
                 }}
               >
-                + Add Warehouse
+                Remove Connection
               </button>
             </div>
 
-            {Object.entries(location.warehouses).map(([warehouseName, warehouseId]) => (
-              <div
-                key={warehouseName}
+            {!location.connectionId && (
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+                  Select Connection
+                </label>
+                <SearchableSelect
+                  options={connections.map(conn => ({ id: conn.id, name: conn.name }))}
+                  value={location.connectionId}
+                  onChange={(value) => updateLocationMapping(locationIndex, 'connectionId', value)}
+                  placeholder="Select connection..."
+                />
+              </div>
+            )}
+
+          <div style={{ marginBottom: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+              <label style={{ fontWeight: '500' }}>Warehouse Mappings</label>
+              <button
+                onClick={() => addWarehouse(locationIndex)}
+                disabled={!location.connectionId}
                 style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr auto',
-                  gap: '0.5rem',
-                  marginBottom: '0.5rem',
-                  alignItems: 'center'
+                  padding: '0.25rem 0.75rem',
+                  backgroundColor: !location.connectionId ? '#ccc' : '#28a745',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: !location.connectionId ? 'not-allowed' : 'pointer',
+                  fontSize: '0.875rem'
                 }}
+                title={!location.connectionId ? 'Select a connection first' : ''}
               >
-                <input
-                  type="text"
-                  value={warehouseName}
-                  onChange={(e) => renameWarehouse(locationIndex, warehouseName, e.target.value)}
-                  placeholder="Warehouse Name"
+                + Add Mapping
+              </button>
+            </div>
+
+            {location.warehouses.map((warehouse, warehouseIndex) => {
+              // Get Trackstar locations for the selected connection
+              const selectedConnection = connections.find(conn => conn.id === location.connectionId);
+              const trackstarLocations = selectedConnection?.locations || [];
+
+              return (
+                <div
+                  key={warehouseIndex}
                   style={{
-                    padding: '0.5rem',
-                    border: '1px solid #ddd',
+                    border: '1px solid #ccc',
                     borderRadius: '4px',
-                    fontSize: '0.875rem'
-                  }}
-                />
-                <input
-                  type="text"
-                  value={warehouseId}
-                  onChange={(e) => updateWarehouse(locationIndex, warehouseName, e.target.value)}
-                  placeholder="Warehouse ID"
-                  style={{
-                    padding: '0.5rem',
-                    border: '1px solid #ddd',
-                    borderRadius: '4px',
-                    fontSize: '0.875rem'
-                  }}
-                />
-                <button
-                  onClick={() => removeWarehouse(locationIndex, warehouseName)}
-                  style={{
-                    padding: '0.5rem',
-                    backgroundColor: '#dc3545',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '4px',
-                    cursor: 'pointer',
-                    fontSize: '0.875rem'
+                    padding: '1rem',
+                    marginBottom: '0.5rem',
+                    backgroundColor: 'white'
                   }}
                 >
-                  Remove
-                </button>
-              </div>
-            ))}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                    <strong style={{ fontSize: '0.875rem' }}>Mapping {warehouseIndex + 1}</strong>
+                    <button
+                      onClick={() => removeWarehouse(locationIndex, warehouseIndex)}
+                      style={{
+                        padding: '0.125rem 0.5rem',
+                        backgroundColor: '#dc3545',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontSize: '0.75rem'
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
 
-            {Object.keys(location.warehouses).length === 0 && (
+                  {!location.connectionId ? (
+                    <div style={{
+                      padding: '1rem',
+                      backgroundColor: '#fff3cd',
+                      border: '1px solid #ffc107',
+                      borderRadius: '4px',
+                      color: '#856404',
+                      fontSize: '0.875rem'
+                    }}>
+                      Please select a connection first to enable warehouse mapping.
+                    </div>
+                  ) : (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', fontWeight: '500' }}>
+                          Cin7 Warehouse
+                        </label>
+                        <SearchableSelect
+                          options={cin7Warehouses}
+                          value={warehouse.cin7WarehouseId}
+                          onChange={(value) => updateCin7Warehouse(locationIndex, warehouseIndex, value)}
+                          placeholder="Select Cin7 warehouse..."
+                        />
+                        {warehouse.cin7WarehouseId && (
+                          <div style={{ marginTop: '0.25rem' }}>
+                            {warehouse.cin7WarehouseName && (
+                              <div style={{ fontSize: '0.75rem', color: '#666', marginBottom: '0.125rem' }}>
+                                {warehouse.cin7WarehouseName}
+                              </div>
+                            )}
+                            <div style={{
+                              fontSize: '0.7rem',
+                              color: '#999',
+                              fontFamily: 'monospace',
+                              letterSpacing: '-0.02em'
+                            }}>
+                              ID: {warehouse.cin7WarehouseId}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', fontWeight: '500' }}>
+                          Trackstar Location
+                        </label>
+                        <SearchableSelect
+                          options={trackstarLocations}
+                          value={warehouse.trackstarLocationId}
+                          onChange={(value) => updateWarehouseMapping(locationIndex, warehouseIndex, 'trackstarLocationId', value)}
+                          placeholder="Select Trackstar location..."
+                          disabled={trackstarLocations.length === 0}
+                        />
+                        {warehouse.trackstarLocationId && (
+                          <div style={{
+                            marginTop: '0.25rem',
+                            fontSize: '0.7rem',
+                            color: '#999',
+                            fontFamily: 'monospace',
+                            letterSpacing: '-0.02em'
+                          }}>
+                            ID: {warehouse.trackstarLocationId}
+                          </div>
+                        )}
+                        {trackstarLocations.length === 0 && (
+                          <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: '#dc3545' }}>
+                            No locations available for this connection
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {location.warehouses.length === 0 && (
               <div style={{
                 textAlign: 'center',
                 padding: '1rem',
@@ -287,7 +373,7 @@ export function LocationMappingEditor({ locationMapping, onChange }: Props) {
                 border: '1px dashed #ddd',
                 fontSize: '0.875rem'
               }}>
-                No warehouses configured. Click "Add Warehouse" to create one.
+                No warehouse mappings configured. Click "Add Warehouse" to create one.
               </div>
             )}
           </div>
@@ -435,9 +521,10 @@ export function LocationMappingEditor({ locationMapping, onChange }: Props) {
             ))}
           </div>
         </div>
-      ))}
+        );
+      })}
 
-      {locationMapping.length === 0 && (
+      {locationMapping.length === 0 && availableConnections.length === 0 && (
         <div style={{
           textAlign: 'center',
           padding: '2rem',
@@ -446,7 +533,20 @@ export function LocationMappingEditor({ locationMapping, onChange }: Props) {
           borderRadius: '4px',
           border: '1px dashed #ddd'
         }}>
-          No location mappings yet. Click "Add Location" to create one.
+          No connections available to configure. Please check your connection settings.
+        </div>
+      )}
+
+      {locationMapping.length === 0 && availableConnections.length > 0 && (
+        <div style={{
+          textAlign: 'center',
+          padding: '2rem',
+          color: '#666',
+          backgroundColor: '#fafafa',
+          borderRadius: '4px',
+          border: '1px dashed #ddd'
+        }}>
+          No location mappings configured yet. Select a connection above to get started.
         </div>
       )}
     </div>

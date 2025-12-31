@@ -1,0 +1,36 @@
+{
+  "apiKey": "9e8a14d0-b3c6-4a47-b821-126c56cce6da",
+  "syncConfig": [
+    {
+      "entity": "sale",
+      "status": "Inactive"
+    },
+    {
+      "entity": "purchase",
+      "status": "Inactive"
+    },
+    {
+      "entity": "transfer",
+      "status": "Active"
+    },
+    {
+      "entity": "inventory",
+      "status": "Active",
+      "quantityType": "onhand",
+      "locationScope": "mapped",
+      "autoAcceptThreshold": 0
+    }
+  ],
+  "locationMapping": [
+    {
+      "warehouses": {
+        "Collective Logistics - AU Warehouse": "V2FyZWhvdXNlOjEyMjI0Ng=="
+      },
+      "connectionId": "piyama-au"
+    }
+  ],
+  "notificationRecipient": [
+    "jib@four13.co",
+    "talaine@four13.co"
+  ]
+}

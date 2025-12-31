@@ -4,42 +4,39 @@
  */
 
 /**
+ * Mask API key for security (show only first/last 4 characters)
+ * @param {string} apiKey - API key to mask
+ * @returns {string} Masked API key
+ */
+function maskApiKey(apiKey) {
+  if (!apiKey || apiKey.length < 12) {
+    return '********';
+  }
+  const first4 = apiKey.substring(0, 4);
+  const last4 = apiKey.substring(apiKey.length - 4);
+  return `${first4}${'*'.repeat(apiKey.length - 8)}${last4}`;
+}
+
+/**
  * Parse tenant config from database row
- * @param {Object} dbRow - Row from PostgreSQL database
+ * @param {Object} params - Handler parameters with params.data.var.config and params.data.var.tenantId
+ * @param {boolean} maskKey - Whether to mask the API key (default: true)
  * @returns {Object} Parsed tenant configuration
  */
-function parseTenantConfig(dbRow) {
+function parseTenantConfig(params, maskKey = true) {
   try {
-    // If config is already an object, return it
-    if (typeof dbRow.config === 'object' && dbRow.config !== null) {
-      return {
-        tenantId: dbRow.tenant_id || dbRow.tenantId,
-        apiKey: dbRow.config.apiKey,
-        syncConfig: dbRow.config.syncConfig || [],
-        locationMapping: dbRow.config.locationMapping || [],
-        metadata: {
-          createdAt: dbRow.created_at || dbRow.createdAt,
-          updatedAt: dbRow.updated_at || dbRow.updatedAt,
-        }
-      };
-    }
+    let config = params.data.var.config;
+    let tenantId = params.data.var.tenantId;
 
-    // If config is a JSON string, parse it
-    if (typeof dbRow.config === 'string') {
-      const config = JSON.parse(dbRow.config);
-      return {
-        tenantId: dbRow.tenant_id || dbRow.tenantId,
-        apiKey: config.apiKey,
-        syncConfig: config.syncConfig || [],
-        locationMapping: config.locationMapping || [],
-        metadata: {
-          createdAt: dbRow.created_at || dbRow.createdAt,
-          updatedAt: dbRow.updated_at || dbRow.updatedAt,
-        }
-      };
-    }
-
-    throw new Error('Invalid config format');
+    return {
+      tenantId: tenantId,
+      // Mask apiKey in responses for security
+      apiKey: maskKey ? maskApiKey(config.apiKey) : config.apiKey,
+      hasApiKey: !!config.apiKey, // Indicate if API key exists
+      syncConfig: config.syncConfig || [],
+      locationMapping: config.locationMapping || [],
+      notificationRecipient: config.notificationRecipient || []
+    };
   } catch (error) {
     console.error('Error parsing tenant config:', error);
     throw new Error(`Failed to parse tenant config: ${error.message}`);
@@ -49,17 +46,22 @@ function parseTenantConfig(dbRow) {
 /**
  * Prepare tenant config for database storage
  * @param {Object} config - Tenant configuration object
- * @returns {string} JSON string ready for PostgreSQL jsonb column
+ * @param {Object} existingConfig - Existing configuration (optional, to preserve masked API key)
+ * @returns {Object} Config object ready for database storage
  */
-function prepareTenantConfigForDB(config) {
+function prepareTenantConfigForDB(config, existingConfig = null) {
   try {
     const dbConfig = {
-      apiKey: config.apiKey,
+      // If apiKey is masked (contains asterisks), keep existing one
+      apiKey: (config.apiKey && !config.apiKey.includes('*'))
+        ? config.apiKey
+        : existingConfig?.apiKey || config.apiKey,
       syncConfig: config.syncConfig || [],
-      locationMapping: config.locationMapping || []
+      locationMapping: config.locationMapping || [],
+      notificationRecipient: config.notificationRecipient || []
     };
 
-    return JSON.stringify(dbConfig);
+    return dbConfig;
   } catch (error) {
     console.error('Error preparing tenant config for DB:', error);
     throw new Error(`Failed to prepare config for database: ${error.message}`);
@@ -79,10 +81,12 @@ function validateTenantConfig(config) {
     return { valid: false, errors };
   }
 
+  // Validate apiKey (allow masked keys for updates)
   if (!config.apiKey || typeof config.apiKey !== 'string') {
     errors.push('apiKey is required and must be a string');
   }
 
+  // Validate syncConfig
   if (!Array.isArray(config.syncConfig)) {
     errors.push('syncConfig must be an array');
   } else {
@@ -95,10 +99,20 @@ function validateTenantConfig(config) {
       }
       if (!Array.isArray(sync.webhook)) {
         errors.push(`syncConfig[${index}]: webhook must be an array`);
+      } else {
+        sync.webhook.forEach((webhook, webhookIndex) => {
+          if (!webhook.url) {
+            errors.push(`syncConfig[${index}].webhook[${webhookIndex}]: url is required`);
+          }
+          if (!webhook.event) {
+            errors.push(`syncConfig[${index}].webhook[${webhookIndex}]: event is required`);
+          }
+        });
       }
     });
   }
 
+  // Validate locationMapping
   if (!Array.isArray(config.locationMapping)) {
     errors.push('locationMapping must be an array');
   } else {
@@ -110,6 +124,20 @@ function validateTenantConfig(config) {
         errors.push(`locationMapping[${index}]: connectionId is required`);
       }
     });
+  }
+
+  // Validate notificationRecipient
+  if (config.notificationRecipient) {
+    if (!Array.isArray(config.notificationRecipient)) {
+      errors.push('notificationRecipient must be an array');
+    } else {
+      config.notificationRecipient.forEach((email, index) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          errors.push(`notificationRecipient[${index}]: invalid email format`);
+        }
+      });
+    }
   }
 
   return {
@@ -333,6 +361,7 @@ async function updateTenantConfigHandler(event, context, pgClient) {
 }
 
 module.exports = {
+  maskApiKey,
   parseTenantConfig,
   prepareTenantConfigForDB,
   validateTenantConfig,

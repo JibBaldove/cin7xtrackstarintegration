@@ -20,11 +20,13 @@ export interface SubstitutionList {
 }
 
 export interface WarehouseMapping {
-  [warehouseName: string]: string;
+  cin7WarehouseId: string;
+  cin7WarehouseName?: string;
+  trackstarLocationId: string;
 }
 
 export interface LocationMapping {
-  warehouses: WarehouseMapping;
+  warehouses: WarehouseMapping[];
   connectionId: string;
   substitutionList?: SubstitutionList[];
 }
