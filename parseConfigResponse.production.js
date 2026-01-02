@@ -8,6 +8,7 @@ function handler(params) {
   // Return ALL config data for UI - no filtering
   const parsedConfig = {
     apiKey: tenantConfig.apiKey || '',
+    hasApiKey: !!tenantConfig.apiKey, // Indicate if API key exists
 
     // Parse sync configuration - include ALL entities with ALL their fields
     syncConfig: (tenantConfig.syncConfig || []).map(entity => {

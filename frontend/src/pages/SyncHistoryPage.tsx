@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../api/client';
 import type { SyncHistoryRecord, EntityType, SyncStatus } from '../types/syncHistory';
+import type { TenantConfig } from '../types/config';
 
 type SortField = 'cin7_key' | 'trackstar_key' | 'connection_id' | 'last_sync_status' | 'last_sync_action' | 'last_pushed_date' | 'created_at';
 type SortDirection = 'asc' | 'desc';
@@ -19,17 +20,38 @@ export function SyncHistoryPage() {
   const [sortField, setSortField] = useState<SortField>('last_pushed_date');
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [tenantConfig, setTenantConfig] = useState<TenantConfig | null>(null);
 
   // Filters
   const [selectedEntity, setSelectedEntity] = useState<EntityType | ''>('');
   const [minDate, setMinDate] = useState('');
 
-  const entities: EntityType[] = ['sale', 'purchase', 'transfer', 'inventory', 'product'];
+  // Get active entities from config
+  const activeEntities: EntityType[] = useMemo(() => {
+    if (!tenantConfig) {
+      return [];
+    }
+    return tenantConfig.syncConfig
+      .filter(sync => sync.status === 'Active')
+      .map(sync => sync.entity);
+  }, [tenantConfig]);
+
   const statuses: SyncStatus[] = ['Success', 'Failed', 'Skipped', 'Invalid', 'In Queue'];
 
   useEffect(() => {
+    loadTenantConfig();
     loadSyncHistory();
   }, []);
+
+  const loadTenantConfig = async () => {
+    try {
+      const response = await apiClient.getTenantConfig();
+      setTenantConfig(response.config);
+    } catch (err: any) {
+      console.error('Failed to load tenant config:', err);
+      // Don't show error to user, just log it
+    }
+  };
 
   const loadSyncHistory = async () => {
     setLoading(true);
@@ -310,21 +332,29 @@ export function SyncHistoryPage() {
             <select
               value={selectedEntity}
               onChange={(e) => setSelectedEntity(e.target.value as EntityType | '')}
+              disabled={activeEntities.length === 0}
               style={{
                 width: '100%',
                 padding: '0.5rem',
                 border: '1px solid #ddd',
                 borderRadius: '4px',
-                fontSize: '0.875rem'
+                fontSize: '0.875rem',
+                cursor: activeEntities.length === 0 ? 'not-allowed' : 'pointer',
+                opacity: activeEntities.length === 0 ? 0.6 : 1
               }}
             >
-              <option value="">All Entities</option>
-              {entities.map(entity => (
+              <option value="">All Active Entities</option>
+              {activeEntities.map(entity => (
                 <option key={entity} value={entity}>
                   {entity.charAt(0).toUpperCase() + entity.slice(1)}
                 </option>
               ))}
             </select>
+            {activeEntities.length === 0 && tenantConfig && (
+              <div style={{ fontSize: '0.75rem', color: '#dc3545', marginTop: '0.25rem' }}>
+                No active entities in config
+              </div>
+            )}
           </div>
 
           <div>

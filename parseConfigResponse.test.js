@@ -31,6 +31,7 @@ console.log(JSON.stringify(result, null, 2));
 Expected Output Structure:
 {
   "apiKey": "9e8a14d0-b3c6-4a47-b821-126c56cce6da",
+  "hasApiKey": true,
   "syncConfig": [
     {
       "entity": "sale",

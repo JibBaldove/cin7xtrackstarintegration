@@ -93,7 +93,16 @@ export function LocationMappingEditor({
     const updated = [...locationMapping];
     const substitutionList = [...(updated[locationIndex].substitutionList || [])];
     const mapping = { ...substitutionList[subIndex].mapping };
-    mapping['New Key'] = '';
+
+    // Find a unique key name
+    let keyName = 'New Key';
+    let counter = 1;
+    while (mapping[keyName] !== undefined) {
+      keyName = `New Key ${counter}`;
+      counter++;
+    }
+
+    mapping[keyName] = '';
     substitutionList[subIndex] = { ...substitutionList[subIndex], mapping };
     updated[locationIndex] = { ...updated[locationIndex], substitutionList };
     onChange(updated);
@@ -104,6 +113,26 @@ export function LocationMappingEditor({
     const substitutionList = [...(updated[locationIndex].substitutionList || [])];
     const mapping = { ...substitutionList[subIndex].mapping };
     mapping[key] = value;
+    substitutionList[subIndex] = { ...substitutionList[subIndex], mapping };
+    updated[locationIndex] = { ...updated[locationIndex], substitutionList };
+    onChange(updated);
+  };
+
+  const renameSubstitutionKey = (locationIndex: number, subIndex: number, oldKey: string, newKey: string) => {
+    const updated = [...locationMapping];
+    const substitutionList = [...(updated[locationIndex].substitutionList || [])];
+    const mapping = { ...substitutionList[subIndex].mapping };
+
+    // Don't rename if key hasn't changed or new key already exists
+    if (oldKey === newKey || (mapping[newKey] !== undefined && oldKey !== newKey)) {
+      return;
+    }
+
+    // Store the value, delete old key, add new key
+    const value = mapping[oldKey];
+    delete mapping[oldKey];
+    mapping[newKey] = value;
+
     substitutionList[subIndex] = { ...substitutionList[subIndex], mapping };
     updated[locationIndex] = { ...updated[locationIndex], substitutionList };
     onChange(updated);
@@ -476,30 +505,52 @@ export function LocationMappingEditor({
                         alignItems: 'center'
                       }}
                     >
-                      <input
-                        type="text"
-                        value={key}
-                        readOnly
-                        style={{
-                          padding: '0.375rem',
-                          border: '1px solid #ddd',
-                          borderRadius: '4px',
-                          fontSize: '0.8125rem',
-                          backgroundColor: '#f9f9f9'
-                        }}
-                      />
-                      <input
-                        type="text"
-                        value={value}
-                        onChange={(e) => updateSubstitutionMapping(locationIndex, subIndex, key, e.target.value)}
-                        placeholder="Value"
-                        style={{
-                          padding: '0.375rem',
-                          border: '1px solid #ddd',
-                          borderRadius: '4px',
-                          fontSize: '0.8125rem'
-                        }}
-                      />
+                      <div>
+                        <input
+                          type="text"
+                          defaultValue={key}
+                          onBlur={(e) => {
+                            const newKey = e.target.value.trim();
+                            if (newKey && newKey !== key) {
+                              renameSubstitutionKey(locationIndex, subIndex, key, newKey);
+                            } else if (!newKey) {
+                              // If empty, revert to original key
+                              e.target.value = key;
+                            }
+                          }}
+                          placeholder="Cin7 value (e.g., United States)"
+                          style={{
+                            width: '100%',
+                            padding: '0.375rem',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '0.8125rem',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                        <div style={{ fontSize: '0.65rem', color: '#666', marginTop: '0.125rem' }}>
+                          Cin7 value
+                        </div>
+                      </div>
+                      <div>
+                        <input
+                          type="text"
+                          value={value}
+                          onChange={(e) => updateSubstitutionMapping(locationIndex, subIndex, key, e.target.value)}
+                          placeholder="Trackstar value (e.g., US)"
+                          style={{
+                            width: '100%',
+                            padding: '0.375rem',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '0.8125rem',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                        <div style={{ fontSize: '0.65rem', color: '#666', marginTop: '0.125rem' }}>
+                          Trackstar value
+                        </div>
+                      </div>
                       <button
                         onClick={() => removeSubstitutionMapping(locationIndex, subIndex, key)}
                         style={{
