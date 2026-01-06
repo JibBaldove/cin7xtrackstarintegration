@@ -13,6 +13,7 @@ export function SyncHistoryPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [actionFilter, setActionFilter] = useState<'PUSH' | 'PULL' | 'ALL'>('PUSH');
   const [activeTab, setActiveTab] = useState<SyncStatus | 'All' | 'Ready to Process'>('Ready to Process');
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [resyncingRecords, setResyncingRecords] = useState<Set<string>>(new Set());
@@ -69,13 +70,27 @@ export function SyncHistoryPage() {
     }
   };
 
+  // Normalize last_sync_action: treat null, empty, or "null" as PUSH
+  const normalizedRecords = useMemo(() => {
+    return records.map(record => {
+      const action = record.last_sync_action as any; // Cast to any to handle string 'null' values
+      const normalizedAction = (!action || action === 'null' || action.trim() === '')
+        ? 'PUSH' as const
+        : record.last_sync_action;
+      return {
+        ...record,
+        last_sync_action: normalizedAction
+      };
+    });
+  }, [records]);
+
   // Organize records into parent-child structure
   const organizedRecords = useMemo(() => {
     // Records without parent_reference_key or with 'null' string are considered parents
-    const parentRecords = records.filter(r => !r.parent_reference_key || r.parent_reference_key === 'null');
+    const parentRecords = normalizedRecords.filter(r => !r.parent_reference_key || r.parent_reference_key === 'null');
 
     // Records with parent_reference_key are potential children
-    const potentialChildRecords = records.filter(r => r.parent_reference_key && r.parent_reference_key !== 'null');
+    const potentialChildRecords = normalizedRecords.filter(r => r.parent_reference_key && r.parent_reference_key !== 'null');
 
     // Find which potential children actually have their parents in the result set
     const parentReferenceKeys = new Set(parentRecords.map(p => p.reference_key));
@@ -109,11 +124,16 @@ export function SyncHistoryPage() {
 
     // Combine parent records and orphaned children
     return [...parentsWithChildren, ...orphanedAsStandalone];
-  }, [records]);
+  }, [normalizedRecords]);
 
   // Filter and search records
   const filteredRecords = useMemo(() => {
     let filtered = organizedRecords;
+
+    // Filter by action (PUSH/PULL)
+    if (actionFilter !== 'ALL') {
+      filtered = filtered.filter(r => r.last_sync_action === actionFilter);
+    }
 
     // Filter by status tab
     if (activeTab === 'Ready to Process') {
@@ -158,21 +178,26 @@ export function SyncHistoryPage() {
     });
 
     return sorted;
-  }, [organizedRecords, activeTab, searchTerm, sortField, sortDirection]);
+  }, [organizedRecords, actionFilter, activeTab, searchTerm, sortField, sortDirection]);
 
-  // Count records by status
+  // Count records by status (filtered by action)
   const statusCounts = useMemo(() => {
-    const counts: Record<string, number> = { All: organizedRecords.length };
+    // Filter by action first
+    const actionFiltered = actionFilter === 'ALL'
+      ? organizedRecords
+      : organizedRecords.filter(r => r.last_sync_action === actionFilter);
+
+    const counts: Record<string, number> = { All: actionFiltered.length };
     statuses.forEach(status => {
-      counts[status] = organizedRecords.filter(r => r.displayStatus === status).length;
+      counts[status] = actionFiltered.filter(r => r.displayStatus === status).length;
     });
-    counts.Redirected = organizedRecords.filter(r => r.displayStatus === 'Redirected').length;
+    counts.Redirected = actionFiltered.filter(r => r.displayStatus === 'Redirected').length;
     // Ready to Process includes Failed and In Queue
-    counts['Ready to Process'] = organizedRecords.filter(r =>
+    counts['Ready to Process'] = actionFiltered.filter(r =>
       r.displayStatus === 'Failed' || r.displayStatus === 'In Queue'
     ).length;
     return counts;
-  }, [organizedRecords]);
+  }, [organizedRecords, actionFilter]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
@@ -230,32 +255,57 @@ export function SyncHistoryPage() {
 
     try {
       const connectionId = record.connection_id || 'default';
+      const isPull = record.last_sync_action === 'PULL';
 
-      // Extract the base cin7_id (without any suffixes like :from, :to, :TO, :FROM)
-      // For sales: extract substring before colon if present
-      // For transfers: might have :from, :to, :FROM, :TO suffixes
-      let baseCin7Id = record.cin7_id;
+      if (isPull) {
+        // For PULL actions, use trackstar_id
+        if (!record.trackstar_id || record.trackstar_id === 'null') {
+          throw new Error('No Trackstar ID available for PULL action');
+        }
 
-      // For sales and transfers, remove any suffix after colon
-      if (record.type === 'sale' || record.type === 'transfer') {
-        baseCin7Id = record.cin7_id.split(':')[0];
+        switch (record.type) {
+          case 'sale':
+            await apiClient.resyncSalePull(record.trackstar_id, connectionId);
+            break;
+          case 'purchase':
+            await apiClient.resyncPurchasePull(record.trackstar_id, connectionId);
+            break;
+          case 'transfer':
+            await apiClient.resyncTransferPull(record.trackstar_id, connectionId);
+            break;
+          default:
+            throw new Error(`PULL resync not implemented for type: ${record.type}`);
+        }
+
+        setSuccessMessage(`Successfully triggered PULL resync for ${record.trackstar_key || record.trackstar_id}`);
+      } else {
+        // For PUSH actions, use cin7_id
+        // Extract the base cin7_id (without any suffixes like :from, :to, :TO, :FROM)
+        // For sales: extract substring before colon if present
+        // For transfers: might have :from, :to, :FROM, :TO suffixes
+        let baseCin7Id = record.cin7_id;
+
+        // For sales and transfers, remove any suffix after colon
+        if (record.type === 'sale' || record.type === 'transfer') {
+          baseCin7Id = record.cin7_id.split(':')[0];
+        }
+
+        switch (record.type) {
+          case 'sale':
+            await apiClient.resyncSale(baseCin7Id, connectionId);
+            break;
+          case 'purchase':
+            await apiClient.resyncPurchase(baseCin7Id, connectionId);
+            break;
+          case 'transfer':
+            await apiClient.resyncTransfer(baseCin7Id, connectionId);
+            break;
+          default:
+            throw new Error(`PUSH resync not implemented for type: ${record.type}`);
+        }
+
+        setSuccessMessage(`Successfully triggered PUSH resync for ${record.cin7_key}`);
       }
-
-      switch (record.type) {
-        case 'sale':
-          await apiClient.resyncSale(baseCin7Id, connectionId);
-          break;
-        case 'purchase':
-          await apiClient.resyncPurchase(baseCin7Id, connectionId);
-          break;
-        case 'transfer':
-          await apiClient.resyncTransfer(baseCin7Id, connectionId);
-          break;
-        default:
-          throw new Error(`Resync not implemented for type: ${record.type}`);
-      }
-
-      setSuccessMessage(`Successfully triggered resync for ${record.cin7_key}`);
 
       // Reload records after successful resync
       setTimeout(() => {
@@ -266,7 +316,10 @@ export function SyncHistoryPage() {
     } catch (err: any) {
       console.error('Resync error:', err);
       const errorMessage = err.response?.data?.error || err.message || 'Failed to resync record';
-      setError(`Failed to resync ${record.cin7_key}: ${errorMessage}`);
+      const displayKey = record.last_sync_action === 'PULL'
+        ? (record.trackstar_key || record.trackstar_id)
+        : record.cin7_key;
+      setError(`Failed to resync ${displayKey}: ${errorMessage}`);
     } finally {
       // Remove record from resyncing set
       setResyncingRecords(prev => {
@@ -314,6 +367,45 @@ export function SyncHistoryPage() {
       <div style={{ marginBottom: '2rem' }}>
         <h1 style={{ margin: '0 0 0.5rem 0' }}>Sync History</h1>
         <p style={{ margin: 0, color: '#666' }}>View and manage synchronization records for {tenantId}</p>
+      </div>
+
+      {/* Action Filter Tabs (PUSH/PULL/ALL) */}
+      <div style={{
+        display: 'flex',
+        gap: '0.5rem',
+        marginBottom: '1.5rem',
+        borderBottom: '3px solid #e0e0e0',
+        paddingBottom: '0'
+      }}>
+        {(['PUSH', 'PULL', 'ALL'] as const).map(action => {
+          const actionCounts = action === 'ALL'
+            ? organizedRecords.length
+            : organizedRecords.filter(r => r.last_sync_action === action).length;
+
+          return (
+            <button
+              key={action}
+              onClick={() => setActionFilter(action)}
+              style={{
+                padding: '1rem 2rem',
+                backgroundColor: actionFilter === action ? '#007bff' : 'transparent',
+                color: actionFilter === action ? 'white' : '#666',
+                border: 'none',
+                borderTopLeftRadius: '8px',
+                borderTopRightRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: actionFilter === action ? '600' : '500',
+                fontSize: '1rem',
+                transition: 'all 0.2s',
+                borderBottom: actionFilter === action ? 'none' : '3px solid transparent',
+                position: 'relative',
+                bottom: '-3px'
+              }}
+            >
+              {action === 'PUSH' ? 'Cin7 → Trackstar (PUSH)' : action === 'PULL' ? 'Trackstar → Cin7 (PULL)' : 'All Records'} ({actionCounts})
+            </button>
+          );
+        })}
       </div>
 
       {/* Filters */}
@@ -486,7 +578,9 @@ export function SyncHistoryPage() {
               <SortableHeader field="last_sync_status">Status</SortableHeader>
               <SortableHeader field="last_sync_action">Action</SortableHeader>
               <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600' }}>Message</th>
-              <SortableHeader field="last_pushed_date">Last Pushed</SortableHeader>
+              <SortableHeader field="last_pushed_date">
+                {actionFilter === 'PULL' ? 'Last Pulled' : 'Last Pushed'}
+              </SortableHeader>
               <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600' }}>Actions</th>
             </tr>
           </thead>
@@ -555,14 +649,43 @@ export function SyncHistoryPage() {
                       </div>
                     </td>
                     <td style={{ padding: '0.75rem' }}>
-                      <div>{record.trackstar_key || '-'}</div>
-                      {record.trackstar_id && record.trackstar_id !== 'null' && (
-                        <div
-                          style={{ fontSize: '0.75rem', color: '#999', fontFamily: 'monospace', cursor: 'help' }}
-                          title={record.trackstar_id}
-                        >
-                          {truncateId(record.trackstar_id)}
+                      {record.trackstar_id && record.trackstar_id !== 'null' ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <div style={{ minWidth: 0, flex: 1 }}>
+                            <div>{record.trackstar_key || '-'}</div>
+                            <div
+                              style={{ fontSize: '0.75rem', color: '#999', fontFamily: 'monospace', cursor: 'help' }}
+                              title={record.trackstar_id}
+                            >
+                              {truncateId(record.trackstar_id)}
+                            </div>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              copyToClipboard(record.trackstar_id!, `trackstar-${record.record_id}`);
+                            }}
+                            title="Copy Trackstar ID to clipboard"
+                            style={{
+                              background: 'none',
+                              border: '1px solid #ddd',
+                              borderRadius: '4px',
+                              padding: '0.25rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: copiedId === `trackstar-${record.record_id}` ? '#28a745' : '#666',
+                              transition: 'all 0.2s',
+                              fontSize: '0.875rem',
+                              flexShrink: 0
+                            }}
+                          >
+                            {copiedId === `trackstar-${record.record_id}` ? '✓' : '📋'}
+                          </button>
                         </div>
+                      ) : (
+                        <div>{record.trackstar_key || '-'}</div>
                       )}
                     </td>
                     <td style={{ padding: '0.75rem' }}>{record.connection_id || '-'}</td>
@@ -653,14 +776,43 @@ export function SyncHistoryPage() {
                         </div>
                       </td>
                       <td style={{ padding: '0.75rem' }}>
-                        <div>{child.trackstar_key || '-'}</div>
-                        {child.trackstar_id && child.trackstar_id !== 'null' && (
-                          <div
-                            style={{ fontSize: '0.75rem', color: '#999', fontFamily: 'monospace', cursor: 'help' }}
-                            title={child.trackstar_id}
-                          >
-                            {truncateId(child.trackstar_id)}
+                        {child.trackstar_id && child.trackstar_id !== 'null' ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <div style={{ minWidth: 0, flex: 1 }}>
+                              <div>{child.trackstar_key || '-'}</div>
+                              <div
+                                style={{ fontSize: '0.75rem', color: '#999', fontFamily: 'monospace', cursor: 'help' }}
+                                title={child.trackstar_id}
+                              >
+                                {truncateId(child.trackstar_id)}
+                              </div>
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                copyToClipboard(child.trackstar_id!, `trackstar-${child.record_id}`);
+                              }}
+                              title="Copy Trackstar ID to clipboard"
+                              style={{
+                                background: 'none',
+                                border: '1px solid #ddd',
+                                borderRadius: '4px',
+                                padding: '0.25rem',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: copiedId === `trackstar-${child.record_id}` ? '#28a745' : '#666',
+                                transition: 'all 0.2s',
+                                fontSize: '0.875rem',
+                                flexShrink: 0
+                              }}
+                            >
+                              {copiedId === `trackstar-${child.record_id}` ? '✓' : '📋'}
+                            </button>
                           </div>
+                        ) : (
+                          <div>{child.trackstar_key || '-'}</div>
                         )}
                       </td>
                       <td style={{ padding: '0.75rem' }}>{child.connection_id || '-'}</td>

@@ -5,7 +5,11 @@
       "Bash(npm install)",
       "Bash(npm install:*)",
       "Bash(npm run build:*)",
-      "Bash(node parseConfigResponse.test.js:*)"
+      "Bash(node parseConfigResponse.test.js:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(timeout /t 3 /nobreak)",
+      "Bash(git add:*)"
     ]
   }
 }
