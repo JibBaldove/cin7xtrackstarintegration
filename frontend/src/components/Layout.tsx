@@ -1,12 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { TenantSwitcher } from './TenantSwitcher';
 
 interface Props {
   children: React.ReactNode;
 }
 
 export function Layout({ children }: Props) {
-  const { tenantId, logout } = useAuth();
+  const { logout } = useAuth();
   const location = useLocation();
 
   const isActive = (path: string) => location.pathname === path;
@@ -56,9 +57,7 @@ export function Layout({ children }: Props) {
           </nav>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <div style={{ fontSize: '0.875rem', color: '#666' }}>
-            <strong>Tenant:</strong> {tenantId}
-          </div>
+          <TenantSwitcher />
           <button
             onClick={logout}
             style={{

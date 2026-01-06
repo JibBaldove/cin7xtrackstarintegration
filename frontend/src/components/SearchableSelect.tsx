@@ -72,16 +72,15 @@ export function SearchableSelect({ options, value, onChange, placeholder, disabl
       {isOpen && (
         <div
           style={{
-            position: 'absolute',
-            top: '100%',
-            left: 0,
-            right: 0,
-            marginTop: '0.25rem',
+            position: 'fixed',
+            top: wrapperRef.current ? wrapperRef.current.getBoundingClientRect().bottom + 4 : 0,
+            left: wrapperRef.current ? wrapperRef.current.getBoundingClientRect().left : 0,
+            width: wrapperRef.current ? wrapperRef.current.getBoundingClientRect().width : 'auto',
             backgroundColor: 'white',
             border: '1px solid #ddd',
             borderRadius: '4px',
-            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-            zIndex: 1000,
+            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            zIndex: 9999,
             maxHeight: '300px',
             overflow: 'hidden',
             display: 'flex',
@@ -89,7 +88,7 @@ export function SearchableSelect({ options, value, onChange, placeholder, disabl
           }}
         >
           {/* Search input */}
-          <div style={{ padding: '0.5rem', borderBottom: '1px solid #ddd' }}>
+          <div style={{ padding: '0.5rem', borderBottom: '1px solid #ddd', flexShrink: 0 }}>
             <input
               type="text"
               value={searchTerm}
@@ -108,7 +107,7 @@ export function SearchableSelect({ options, value, onChange, placeholder, disabl
           </div>
 
           {/* Options list */}
-          <div style={{ overflowY: 'auto', maxHeight: '250px' }}>
+          <div style={{ overflowY: 'auto', flex: 1, minHeight: 0 }}>
             {filteredOptions.length === 0 ? (
               <div
                 style={{

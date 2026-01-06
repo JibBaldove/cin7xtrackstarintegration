@@ -6,6 +6,7 @@ interface AuthContextType {
   tenantId: string | null;
   login: (tenantId: string, apiKey: string) => Promise<void>;
   logout: () => void;
+  switchTenant: (tenantId: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -43,12 +44,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTenantId(null);
   };
 
+  const switchTenant = async (newTenantId: string) => {
+    const apiKey = localStorage.getItem('apiKey');
+    if (!apiKey) {
+      throw new Error('API key not found');
+    }
+
+    apiClient.setAuth(newTenantId, apiKey);
+
+    try {
+      await apiClient.getTenantConfig();
+      setTenantId(newTenantId);
+    } catch (error) {
+      const oldTenantId = localStorage.getItem('tenantId');
+      if (oldTenantId) {
+        apiClient.setAuth(oldTenantId, apiKey);
+      }
+      throw new Error('Failed to switch tenant');
+    }
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, tenantId, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, tenantId, login, logout, switchTenant }}>
       {children}
     </AuthContext.Provider>
   );

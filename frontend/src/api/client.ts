@@ -194,6 +194,78 @@ export class ApiClient {
     const response = await this.client.post('/sync_cin7_trackstar_transfer', payload, { headers });
     return response.data;
   }
+
+  // PULL resync methods (Trackstar to Cin7)
+  async resyncSalePull(trackstarId: string, connectionId?: string) {
+    if (!this.tenantId) {
+      throw new Error('Tenant ID not set');
+    }
+    if (!this.spaceId) {
+      throw new Error('Space ID not set');
+    }
+
+    const webhookUrl = `https://live.fastn.ai/api/v1/clients/${this.spaceId}/webhooks/syncSalesorderTrackstarCin7`;
+    const headers: any = {
+      'x-fastn-space-tenantid': this.tenantId,
+      'x-fastn-space-connection-id': connectionId || 'default',
+      'Content-Type': 'application/json'
+    };
+    const payload = {
+      data: {
+        id: trackstarId
+      }
+    };
+
+    const response = await axios.post(webhookUrl, payload, { headers });
+    return response.data;
+  }
+
+  async resyncPurchasePull(trackstarId: string, connectionId?: string) {
+    if (!this.tenantId) {
+      throw new Error('Tenant ID not set');
+    }
+    if (!this.spaceId) {
+      throw new Error('Space ID not set');
+    }
+
+    const webhookUrl = `https://live.fastn.ai/api/v1/clients/${this.spaceId}/webhooks/syncPurchaseorderTrackstarCin7`;
+    const headers: any = {
+      'x-fastn-space-tenantid': this.tenantId,
+      'x-fastn-space-connection-id': connectionId || 'default',
+      'Content-Type': 'application/json'
+    };
+    const payload = {
+      data: {
+        id: trackstarId
+      }
+    };
+
+    const response = await axios.post(webhookUrl, payload, { headers });
+    return response.data;
+  }
+
+  async resyncTransferPull(trackstarId: string, connectionId?: string) {
+    if (!this.tenantId) {
+      throw new Error('Tenant ID not set');
+    }
+    const headers: any = {
+      'x-fastn-space-connection-id': connectionId || 'default'
+    };
+    const payload = {
+      input: {
+        TransferID: trackstarId
+      }
+    };
+    const response = await this.client.post('/sync_trackstar_cin7_transfer', payload, { headers });
+    return response.data;
+  }
+
+  async getTenantList(): Promise<string[]> {
+    const response = await this.client.post('/get_cin7_trackstar_tenants', {
+      input: {}
+    });
+    return response.data.tenants || [];
+  }
 }
 
 export const apiClient = new ApiClient();
