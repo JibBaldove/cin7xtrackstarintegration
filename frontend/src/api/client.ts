@@ -172,7 +172,7 @@ export class ApiClient {
     };
     const payload = {
       input: {
-        PurchaseID: cin7Id
+        TaskID: cin7Id
       }
     };
     const response = await this.client.post('/sync_cin7_trackstar_purchaseOrder', payload, { headers });

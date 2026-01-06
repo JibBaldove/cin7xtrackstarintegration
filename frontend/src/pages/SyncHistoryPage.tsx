@@ -232,12 +232,12 @@ export function SyncHistoryPage() {
       const connectionId = record.connection_id || 'default';
 
       // Extract the base cin7_id (without any suffixes like :from, :to, :TO, :FROM)
-      // For sales: just use the ID as-is
+      // For sales: extract substring before colon if present
       // For transfers: might have :from, :to, :FROM, :TO suffixes
       let baseCin7Id = record.cin7_id;
 
-      // For transfers, remove the direction suffix
-      if (record.type === 'transfer') {
+      // For sales and transfers, remove any suffix after colon
+      if (record.type === 'sale' || record.type === 'transfer') {
         baseCin7Id = record.cin7_id.split(':')[0];
       }
 
