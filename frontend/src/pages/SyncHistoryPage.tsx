@@ -24,7 +24,7 @@ export function SyncHistoryPage() {
   const [tenantConfig, setTenantConfig] = useState<TenantConfig | null>(null);
 
   // Filters
-  const [selectedEntity, setSelectedEntity] = useState<EntityType | ''>('');
+  const [selectedEntity, setSelectedEntity] = useState<EntityType | ''>('sale');
   const [minDate, setMinDate] = useState('');
 
   // Get active entities from config
@@ -103,15 +103,34 @@ export function SyncHistoryPage() {
       c.parent_reference_key && !parentReferenceKeys.has(c.parent_reference_key)
     );
 
+    // Helper function to determine action based on children (majority wins)
+    const determineActionFromChildren = (children: any[]) => {
+      if (children.length === 0) return null;
+
+      // Count PUSH and PULL actions
+      const actionCounts = { PUSH: 0, PULL: 0 };
+      children.forEach(child => {
+        if (child.last_sync_action === 'PUSH') actionCounts.PUSH++;
+        else if (child.last_sync_action === 'PULL') actionCounts.PULL++;
+      });
+
+      // Return majority, or PUSH if tied
+      return actionCounts.PUSH >= actionCounts.PULL ? 'PUSH' : 'PULL';
+    };
+
     // Map parent records with their children
     const parentsWithChildren = parentRecords.map(parent => {
       const children = actualChildRecords.filter(child => child.parent_reference_key === parent.reference_key);
       const hasChildren = children.length > 0;
 
+      // Determine parent action based on children's actions
+      const derivedAction = hasChildren ? determineActionFromChildren(children) : parent.last_sync_action;
+
       return {
         ...parent,
         children,
-        displayStatus: hasChildren ? 'Redirected' as SyncStatus : parent.last_sync_status
+        displayStatus: hasChildren ? 'Redirected' as SyncStatus : parent.last_sync_status,
+        last_sync_action: derivedAction || parent.last_sync_action
       };
     });
 
@@ -377,11 +396,7 @@ export function SyncHistoryPage() {
         borderBottom: '3px solid #e0e0e0',
         paddingBottom: '0'
       }}>
-        {(['PUSH', 'PULL', 'ALL'] as const).map(action => {
-          const actionCounts = action === 'ALL'
-            ? organizedRecords.length
-            : organizedRecords.filter(r => r.last_sync_action === action).length;
-
+        {(['PUSH', 'PULL'] as const).map(action => {
           return (
             <button
               key={action}
@@ -402,7 +417,7 @@ export function SyncHistoryPage() {
                 bottom: '-3px'
               }}
             >
-              {action === 'PUSH' ? 'Cin7 → Trackstar (PUSH)' : action === 'PULL' ? 'Trackstar → Cin7 (PULL)' : 'All Records'} ({actionCounts})
+              {action === 'PUSH' ? 'Cin7 → Trackstar' : 'Trackstar → Cin7'}
             </button>
           );
         })}
@@ -704,10 +719,9 @@ export function SyncHistoryPage() {
                     <td style={{ padding: '0.75rem' }}>{record.last_sync_action}</td>
                     <td style={{ padding: '0.75rem', maxWidth: '300px' }}>
                       <div style={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap'
-                      }} title={record.last_sync_message}>
+                        wordBreak: 'break-word',
+                        whiteSpace: 'pre-wrap'
+                      }}>
                         {record.last_sync_message}
                       </div>
                     </td>
@@ -831,10 +845,9 @@ export function SyncHistoryPage() {
                       <td style={{ padding: '0.75rem' }}>{child.last_sync_action}</td>
                       <td style={{ padding: '0.75rem', maxWidth: '300px' }}>
                         <div style={{
-                          overflow: 'hidden',
-                          textOverflow: 'ellipsis',
-                          whiteSpace: 'nowrap'
-                        }} title={child.last_sync_message}>
+                          wordBreak: 'break-word',
+                          whiteSpace: 'pre-wrap'
+                        }}>
                           {child.last_sync_message}
                         </div>
                       </td>

@@ -1,12 +1,11 @@
 function handler(params) {
-        const { data, previous_attributes } = params.data?.input || {};
-        let taskId = params?.data?.steps.SelectReferenceTable?.output[0]?.cin7_id;
+      const { data, previous_attributes } = params.data?.input || {};
+      let taskId = params?.data?.steps.SelectReferenceTable?.output[0]?.cin7_id;
 
-        // If taskId contains a colon, extract the part after the colon
-        if (taskId && taskId.includes(':')) {
-            taskId = taskId.split(':')[1];
-        }
-
+      // If taskId contains a colon, extract the part after the colon
+      if (taskId && taskId.includes(':')) {
+          taskId = taskId.split(':')[1];
+      }
 
       // Get location mapping from variables
       const locationMapping = params.data?.var?.locationMapping || [];
@@ -14,7 +13,7 @@ function handler(params) {
       // Check if this is a direct trigger (not a change-based trigger)
       const isDirectTrigger = params.data?.var?.trigger === null || params.data?.var?.trigger === undefined;
 
-      // Helper function to get warehouse name from ID
+      // Helper function to get warehouse name from Trackstar warehouse ID
       function getWarehouseName(warehouseId) {
           if (!warehouseId || !locationMapping || locationMapping.length === 0) {
               return "";
@@ -25,14 +24,14 @@ function handler(params) {
 
           // Search through all connection mappings
           for (let mapping of locationMapping) {
-              if (!mapping.warehouses) continue;
+              if (!mapping.warehouses || !Array.isArray(mapping.warehouses)) continue;
 
-              // Search through warehouses to find the name by ID
-              for (let warehouseName in mapping.warehouses) {
-                  const normalizedMappingId = String(mapping.warehouses[warehouseName]).trim();
+              // Search through warehouses array to find the Cin7 warehouse name by Trackstar location ID
+              for (let warehouse of mapping.warehouses) {
+                  const normalizedMappingId = String(warehouse.trackstarLocationId).trim();
 
                   if (normalizedMappingId === normalizedSearchId) {
-                      return warehouseName;
+                      return warehouse.cin7WarehouseName;
                   }
               }
           }
@@ -60,10 +59,8 @@ function handler(params) {
 
       // Build a Set of changed fields using for...in loop (the only method that works)
       const changedFields = new Set();
-      if (previous_attributes) {
-          for (let key in previous_attributes) {
-              changedFields.add(key);
-          }
+      for (let key in previous_attributes) {
+          changedFields.add(key);
       }
 
       // Helper: Check if field was changed or if we're in direct trigger mode
@@ -291,17 +288,55 @@ function handler(params) {
                   warehouseName = "Main Warehouse";
               }
 
+              // Get current Cin7 order data to check for existing lot info
+              const cin7Order = params.data?.steps?.getSale?.output;
+              const cin7PickLines = cin7Order?.Fulfilments?.[0]?.Pick?.Lines || [];
+
+              // Helper function to get lot info for a SKU
+              function getLotInfo(sku, trackstarLotId, trackstarExpiryDate) {
+                  // Priority 1: Check if Cin7 Pick already has lot info for this SKU
+                  const cin7PickLine = cin7PickLines.find(line => line.SKU === sku);
+                  if (cin7PickLine && cin7PickLine.BatchSN) {
+                      return {
+                          BatchSN: cin7PickLine.BatchSN,
+                          ExpiryDate: cin7PickLine.ExpiryDate || null
+                      };
+                  }
+
+                  // Priority 2: Use Trackstar lot info if available
+                  if (trackstarLotId) {
+                      return {
+                          BatchSN: trackstarLotId,
+                          ExpiryDate: trackstarExpiryDate || null
+                      };
+                  }
+
+                  // Priority 3: No lot info available
+                  return null;
+              }
+
               // If we have shipment package data, use it for box names
               if (firstShipment.packages && firstShipment.packages.length > 0) {
                   firstShipment.packages.forEach((pkg, pkgIndex) => {
                       if (pkg.line_items && pkg.line_items.length > 0) {
                           pkg.line_items.forEach(item => {
-                              packLines.push({
+                              const packLine = {
                                   SKU: item.sku,
                                   Location: warehouseName,
                                   Quantity: item.quantity,
                                   Box: pkg.package_name || pkg.tracking_number || `Box ${pkgIndex + 1}`
-                              });
+                              };
+
+                              // Add lot info if available
+                              const lotInfo = getLotInfo(item.sku, item.lot_id, item.expiration_date);
+                              if (lotInfo) {
+                                  packLine.BatchSN = lotInfo.BatchSN;
+                                  if (lotInfo.ExpiryDate) {
+                                      packLine.ExpiryDate = lotInfo.ExpiryDate;
+                                  }
+                              }
+
+                              packLines.push(packLine);
                           });
                       }
                   });
@@ -309,13 +344,24 @@ function handler(params) {
 
               // Fallback: if no package line items, use main line items
               if (packLines.length === 0) {
-                  data.line_items?.forEach((item, index) => {
-                      packLines.push({
+                  data.line_items?.forEach((item) => {
+                      const packLine = {
                           SKU: item.sku,
                           Location: warehouseName,
                           Quantity: item.quantity,
                           Box: "Box 1"  // Default box name
-                      });
+                      };
+
+                      // Add lot info if available from Cin7 Pick
+                      const lotInfo = getLotInfo(item.sku, null, null);
+                      if (lotInfo) {
+                          packLine.BatchSN = lotInfo.BatchSN;
+                          if (lotInfo.ExpiryDate) {
+                              packLine.ExpiryDate = lotInfo.ExpiryDate;
+                          }
+                      }
+
+                      packLines.push(packLine);
                   });
               }
 
