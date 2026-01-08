@@ -118,6 +118,36 @@ export function SyncHistoryPage() {
       return actionCounts.PUSH >= actionCounts.PULL ? 'PUSH' : 'PULL';
     };
 
+    // Helper function to determine status based on children (priority-based)
+    const determineStatusFromChildren = (children: any[]): SyncStatus => {
+      if (children.length === 0) return 'Success';
+
+      // Priority order: Failed > In Queue > Success > Skipped > Invalid
+      const statusPriority: Record<SyncStatus, number> = {
+        'Failed': 1,
+        'In Queue': 2,
+        'Success': 3,
+        'Skipped': 4,
+        'Invalid': 5
+      };
+
+      // Find the status with the highest priority (lowest number)
+      let highestPriorityStatus: SyncStatus = children[0].last_sync_status;
+      let highestPriority = statusPriority[highestPriorityStatus] || 999;
+
+      children.forEach(child => {
+        const childStatus = child.last_sync_status;
+        const childPriority = statusPriority[childStatus] || 999;
+
+        if (childPriority < highestPriority) {
+          highestPriority = childPriority;
+          highestPriorityStatus = childStatus;
+        }
+      });
+
+      return highestPriorityStatus;
+    };
+
     // Map parent records with their children
     const parentsWithChildren = parentRecords.map(parent => {
       const children = actualChildRecords.filter(child => child.parent_reference_key === parent.reference_key);
@@ -126,10 +156,13 @@ export function SyncHistoryPage() {
       // Determine parent action based on children's actions
       const derivedAction = hasChildren ? determineActionFromChildren(children) : parent.last_sync_action;
 
+      // Determine parent status based on children's statuses (priority-based)
+      const derivedStatus = hasChildren ? determineStatusFromChildren(children) : parent.last_sync_status;
+
       return {
         ...parent,
         children,
-        displayStatus: hasChildren ? 'Redirected' as SyncStatus : parent.last_sync_status,
+        displayStatus: derivedStatus,
         last_sync_action: derivedAction || parent.last_sync_action
       };
     });
@@ -210,7 +243,6 @@ export function SyncHistoryPage() {
     statuses.forEach(status => {
       counts[status] = actionFiltered.filter(r => r.displayStatus === status).length;
     });
-    counts.Redirected = actionFiltered.filter(r => r.displayStatus === 'Redirected').length;
     // Ready to Process includes Failed and In Queue
     counts['Ready to Process'] = actionFiltered.filter(r =>
       r.displayStatus === 'Failed' || r.displayStatus === 'In Queue'
@@ -360,7 +392,6 @@ export function SyncHistoryPage() {
       case 'Failed': return '#dc3545';
       case 'Skipped': return '#ffc107';
       case 'Invalid': return '#6c757d';
-      case 'Redirected': return '#17a2b8';
       case 'In Queue': return '#007bff';
       default: return '#6c757d';
     }
@@ -555,7 +586,7 @@ export function SyncHistoryPage() {
         borderBottom: '2px solid #ddd',
         flexWrap: 'wrap'
       }}>
-        {['Ready to Process', 'All', ...statuses, 'Redirected'].map(status => (
+        {['Ready to Process', 'All', ...statuses].map(status => (
           <button
             key={status}
             onClick={() => setActiveTab(status as SyncStatus | 'All' | 'Ready to Process')}
