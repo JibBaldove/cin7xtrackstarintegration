@@ -44,6 +44,13 @@ export function SyncHistoryPage() {
     loadSyncHistory();
   }, []);
 
+  // Auto-switch to PULL when inventory is selected and current filter is PUSH
+  useEffect(() => {
+    if (selectedEntity === 'inventory' && actionFilter === 'PUSH') {
+      setActionFilter('PULL');
+    }
+  }, [selectedEntity, actionFilter]);
+
   const loadTenantConfig = async () => {
     try {
       const response = await apiClient.getTenantConfig();
@@ -427,7 +434,13 @@ export function SyncHistoryPage() {
         borderBottom: '3px solid #e0e0e0',
         paddingBottom: '0'
       }}>
-        {(['PUSH', 'PULL'] as const).map(action => {
+        {(['PUSH', 'PULL'] as const).filter(action => {
+          // Hide PUSH (Cin7 → Trackstar) tab when inventory is selected
+          if (selectedEntity === 'inventory' && action === 'PUSH') {
+            return false;
+          }
+          return true;
+        }).map(action => {
           return (
             <button
               key={action}
