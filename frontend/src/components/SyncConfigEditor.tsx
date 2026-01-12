@@ -20,6 +20,26 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
     onChange(updated);
   };
 
+  // Helper function to update both event and URL for Sale entity webhooks
+  const updateSaleWebhookEvent = (syncIndex: number, webhookIndex: number, eventType: string) => {
+    const updated = [...syncConfig];
+    const webhooks = [...(updated[syncIndex].webhook || [])];
+
+    // Map event types to their corresponding URLs
+    const eventUrlMap: { [key: string]: string } = {
+      'Sale/PickAuthorised': 'https://live.fastn.ai/api/v1/clients/d0f8c7f3-69d3-403c-90a0-17c8857e095f/webhooks/sync_salesorder_cin7_trackstar',
+      'Sale/OrderAuthorised': 'https://live.fastn.ai/api/v1/clients/d0f8c7f3-69d3-403c-90a0-17c8857e095f/webhooks/sync_salesorder_cin7_trackstar_orderauthorised'
+    };
+
+    webhooks[webhookIndex] = {
+      ...webhooks[webhookIndex],
+      event: eventType,
+      url: eventUrlMap[eventType] || ''
+    };
+    updated[syncIndex] = { ...updated[syncIndex], webhook: webhooks };
+    onChange(updated);
+  };
+
   const addWebhook = (syncIndex: number) => {
     const updated = [...syncConfig];
     const webhooks = [...(updated[syncIndex].webhook || [])];
@@ -286,67 +306,116 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
                   </button>
                 </div>
 
-                <div style={{ marginBottom: '0.5rem' }}>
-                  <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
-                    URL
-                  </label>
-                  <input
-                    type="text"
-                    value={webhook.url}
-                    onChange={(e) => updateWebhook(syncIndex, webhookIndex, 'url', e.target.value)}
-                    placeholder="https://..."
-                    style={{
-                      width: '100%',
-                      padding: '0.5rem',
-                      border: '1px solid #ddd',
-                      borderRadius: '4px',
-                      fontSize: '0.875rem',
-                      boxSizing: 'border-box'
-                    }}
-                  />
-                </div>
+                {/* For Sale entity: Show only event dropdown (URL is automatically set) */}
+                {sync.entity === 'sale' ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
+                        Event Type
+                      </label>
+                      <select
+                        value={webhook.event}
+                        onChange={(e) => updateSaleWebhookEvent(syncIndex, webhookIndex, e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          fontSize: '0.875rem'
+                        }}
+                      >
+                        <option value="">Select Event Type</option>
+                        <option value="Sale/PickAuthorised">Pick Authorised</option>
+                        <option value="Sale/OrderAuthorised">Order Authorised</option>
+                      </select>
+                    </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
-                      Event
-                    </label>
-                    <input
-                      type="text"
-                      value={webhook.event}
-                      onChange={(e) => updateWebhook(syncIndex, webhookIndex, 'event', e.target.value)}
-                      placeholder="e.g., Sale/PickAuthorised"
-                      style={{
-                        width: '100%',
-                        padding: '0.5rem',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        fontSize: '0.875rem',
-                        boxSizing: 'border-box'
-                      }}
-                    />
+                    <div>
+                      <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
+                        Status
+                      </label>
+                      <select
+                        value={webhook.status}
+                        onChange={(e) => updateWebhook(syncIndex, webhookIndex, 'status', e.target.value)}
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          fontSize: '0.875rem'
+                        }}
+                      >
+                        <option value="Active">Active</option>
+                        <option value="Inactive">Inactive</option>
+                      </select>
+                    </div>
                   </div>
+                ) : (
+                  /* For other entities: Show URL input and event input */
+                  <>
+                    <div style={{ marginBottom: '0.5rem' }}>
+                      <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
+                        URL
+                      </label>
+                      <input
+                        type="text"
+                        value={webhook.url}
+                        onChange={(e) => updateWebhook(syncIndex, webhookIndex, 'url', e.target.value)}
+                        placeholder="https://..."
+                        style={{
+                          width: '100%',
+                          padding: '0.5rem',
+                          border: '1px solid #ddd',
+                          borderRadius: '4px',
+                          fontSize: '0.875rem',
+                          boxSizing: 'border-box'
+                        }}
+                      />
+                    </div>
 
-                  <div>
-                    <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
-                      Status
-                    </label>
-                    <select
-                      value={webhook.status}
-                      onChange={(e) => updateWebhook(syncIndex, webhookIndex, 'status', e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '0.5rem',
-                        border: '1px solid #ddd',
-                        borderRadius: '4px',
-                        fontSize: '0.875rem'
-                      }}
-                    >
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                    </select>
-                  </div>
-                </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
+                          Event
+                        </label>
+                        <input
+                          type="text"
+                          value={webhook.event}
+                          onChange={(e) => updateWebhook(syncIndex, webhookIndex, 'event', e.target.value)}
+                          placeholder="e.g., Purchase/OrderAuthorised"
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '0.875rem',
+                            boxSizing: 'border-box'
+                          }}
+                        />
+                      </div>
+
+                      <div>
+                        <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem' }}>
+                          Status
+                        </label>
+                        <select
+                          value={webhook.status}
+                          onChange={(e) => updateWebhook(syncIndex, webhookIndex, 'status', e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '0.5rem',
+                            border: '1px solid #ddd',
+                            borderRadius: '4px',
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          <option value="Active">Active</option>
+                          <option value="Inactive">Inactive</option>
+                        </select>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             ))}
             </div>
