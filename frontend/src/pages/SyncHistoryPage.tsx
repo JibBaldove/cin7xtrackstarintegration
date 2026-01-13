@@ -331,6 +331,12 @@ export function SyncHistoryPage() {
           case 'transfer':
             await apiClient.resyncTransferPull(record.trackstar_id, connectionId);
             break;
+          case 'inventory':
+            if (!record.trackstar_key) {
+              throw new Error('No Trackstar SKU available for inventory sync');
+            }
+            await apiClient.resyncInventoryPull(record.trackstar_key, connectionId);
+            break;
           default:
             throw new Error(`PULL resync not implemented for type: ${record.type}`);
         }
@@ -417,6 +423,12 @@ export function SyncHistoryPage() {
   const truncateId = (id: string, chars: number = 8) => {
     if (!id || id.length <= chars) return id;
     return '...' + id.slice(-chars);
+  };
+
+  const truncateMessage = (message: string | null) => {
+    if (!message) return '';
+    if (message.length <= 500) return message;
+    return message.slice(0, 500) + '...';
   };
 
   return (
@@ -722,9 +734,10 @@ export function SyncHistoryPage() {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              copyToClipboard(record.trackstar_id!, `trackstar-${record.record_id}`);
+                              const valueToCopy = record.type === 'inventory' ? record.trackstar_key! : record.trackstar_id!;
+                              copyToClipboard(valueToCopy, `trackstar-${record.record_id}`);
                             }}
-                            title="Copy Trackstar ID to clipboard"
+                            title={record.type === 'inventory' ? 'Copy Trackstar SKU to clipboard' : 'Copy Trackstar ID to clipboard'}
                             style={{
                               background: 'none',
                               border: '1px solid #ddd',
@@ -762,11 +775,19 @@ export function SyncHistoryPage() {
                     </td>
                     <td style={{ padding: '0.75rem' }}>{record.last_sync_action}</td>
                     <td style={{ padding: '0.75rem', maxWidth: '300px' }}>
-                      <div style={{
-                        wordBreak: 'break-word',
-                        whiteSpace: 'pre-wrap'
-                      }}>
-                        {record.last_sync_message}
+                      <div
+                        style={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          wordBreak: 'break-word',
+                          cursor: record.last_sync_message && record.last_sync_message.length > 500 ? 'help' : 'default'
+                        }}
+                        title={record.last_sync_message || ''}
+                      >
+                        {truncateMessage(record.last_sync_message)}
                       </div>
                     </td>
                     <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>
@@ -788,7 +809,7 @@ export function SyncHistoryPage() {
                           opacity: resyncingRecords.has(record.record_id) ? 0.6 : 1
                         }}
                       >
-                        {resyncingRecords.has(record.record_id) ? 'Resyncing...' : 'Resync'}
+                        {resyncingRecords.has(record.record_id) ? 'Syncing...' : 'Sync'}
                       </button>
                     </td>
                   </tr>
@@ -848,9 +869,10 @@ export function SyncHistoryPage() {
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                copyToClipboard(child.trackstar_id!, `trackstar-${child.record_id}`);
+                                const valueToCopy = child.type === 'inventory' ? child.trackstar_key! : child.trackstar_id!;
+                                copyToClipboard(valueToCopy, `trackstar-${child.record_id}`);
                               }}
-                              title="Copy Trackstar ID to clipboard"
+                              title={child.type === 'inventory' ? 'Copy Trackstar SKU to clipboard' : 'Copy Trackstar ID to clipboard'}
                               style={{
                                 background: 'none',
                                 border: '1px solid #ddd',
@@ -888,11 +910,19 @@ export function SyncHistoryPage() {
                       </td>
                       <td style={{ padding: '0.75rem' }}>{child.last_sync_action}</td>
                       <td style={{ padding: '0.75rem', maxWidth: '300px' }}>
-                        <div style={{
-                          wordBreak: 'break-word',
-                          whiteSpace: 'pre-wrap'
-                        }}>
-                          {child.last_sync_message}
+                        <div
+                          style={{
+                            display: '-webkit-box',
+                            WebkitLineClamp: 3,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            wordBreak: 'break-word',
+                            cursor: child.last_sync_message && child.last_sync_message.length > 500 ? 'help' : 'default'
+                          }}
+                          title={child.last_sync_message || ''}
+                        >
+                          {truncateMessage(child.last_sync_message)}
                         </div>
                       </td>
                       <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>
@@ -914,7 +944,7 @@ export function SyncHistoryPage() {
                             opacity: resyncingRecords.has(child.record_id) ? 0.6 : 1
                           }}
                         >
-                          {resyncingRecords.has(child.record_id) ? 'Resyncing...' : 'Resync'}
+                          {resyncingRecords.has(child.record_id) ? 'Syncing...' : 'Sync'}
                         </button>
                       </td>
                     </tr>

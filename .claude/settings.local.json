@@ -9,7 +9,10 @@
       "Bash(dir:*)",
       "Bash(findstr:*)",
       "Bash(timeout /t 3 /nobreak)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git -C \"C:\\\\Users\\\\JibPC\\\\Documents\\\\Four13Projects\\\\Current Projects\\\\cin7xtrackstarintegration\" log --oneline --all -- \"*salesWebhook*\" \"*Sale*\" \"*sync*config*\")",
+      "Bash(git -C \"C:\\\\Users\\\\JibPC\\\\Documents\\\\Four13Projects\\\\Current Projects\\\\cin7xtrackstarintegration\" log --oneline --all)",
+      "Bash(git -C \"C:\\\\Users\\\\JibPC\\\\Documents\\\\Four13Projects\\\\Current Projects\\\\cin7xtrackstarintegration\" show 53436c1 --stat)"
     ]
   }
 }

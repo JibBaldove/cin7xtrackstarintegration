@@ -14,6 +14,8 @@ export interface SyncConfig {
   quantityType?: 'onhand' | 'available';
   locationScope?: 'mapped' | 'all';
   autoAcceptThreshold?: number;
+  // Sale-specific fields
+  allowCompletedOrders?: boolean;
 }
 
 // Warehouse mapping (ID-based)

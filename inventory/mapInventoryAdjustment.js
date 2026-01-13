@@ -18,7 +18,24 @@ function handler(params) {
 
   // If no exact match found, return error
   if (!matchedProduct) {
-    return { error: `No product found in Cin7 with exact SKU: ${trackstarInventory.sku}` };
+    return {
+      error: `No product found in Cin7 with exact SKU: ${trackstarInventory.sku}`,
+      trackstarId: trackstarInventory.id,
+      trackstarKey: trackstarInventory.sku,
+      referenceKey: 'inventory:' + trackstarInventory.id
+    };
+  }
+
+  // Validate product type - only Stock items can have inventory adjustments
+  if (matchedProduct.Type !== 'Stock') {
+    return {
+      error: `Inventory adjustment is not applicable to non-stock items. Product ${trackstarInventory.sku} is of type: ${matchedProduct.Type}`,
+      cin7Id: matchedProduct.ID,
+      cin7Key: matchedProduct.SKU,
+      trackstarId: trackstarInventory.id,
+      trackstarKey: trackstarInventory.sku,
+      referenceKey: 'inventory:' + trackstarInventory.id
+    };
   }
 
   // Check costing method - if FIFO, Cin7 doesn't support batches, so consolidate lots
@@ -188,6 +205,7 @@ function handler(params) {
     cin7Key: matchedProduct.SKU,
     trackstarId: trackstarInventory.id,
     trackstarKey: trackstarInventory.sku,
-    adjustments: adjustments
+    referenceKey: 'inventory:' + trackstarInventory.id,
+    adjustments
   };
 }

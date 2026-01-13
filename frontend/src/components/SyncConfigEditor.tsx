@@ -256,6 +256,44 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
             </div>
           )}
 
+          {/* Sale-specific fields */}
+          {sync.entity === 'sale' && (
+            <div style={{
+              backgroundColor: '#fff0f0',
+              border: '1px solid #ffcccc',
+              borderRadius: '4px',
+              padding: '1rem',
+              marginBottom: '1rem'
+            }}>
+              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.875rem', color: '#cc0000' }}>
+                Sale Settings
+              </h4>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={sync.allowCompletedOrders ?? true}
+                    onChange={(e) => updateSyncConfig(syncIndex, 'allowCompletedOrders', e.target.checked)}
+                    style={{
+                      marginRight: '0.5rem',
+                      cursor: 'pointer',
+                      width: '16px',
+                      height: '16px'
+                    }}
+                  />
+                  Allow Completed/Fulfilled Orders
+                </label>
+              </div>
+
+              <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#666' }}>
+                <p style={{ margin: '0.25rem 0' }}>
+                  <strong>Note:</strong> When unchecked, you are not able to force sync orders with Cin7 status 'Completed' or 'Fulfilled'
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* Webhooks section - only for sale and purchase */}
           {hasWebhooks(sync.entity) && (
             <div>
