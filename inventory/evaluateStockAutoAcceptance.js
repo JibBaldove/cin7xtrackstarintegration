@@ -23,6 +23,18 @@ function handler(params) {
 
   // If no product availability data, proceed with adjustment and auto-approve
   if (!hasProductAvailability) {
+    // Check if all quantities are zero - if so, no adjustment needed
+    const hasNonZeroQuantity = inventoryAdjustment.Lines.some(line => line.Quantity !== 0);
+
+    if (!hasNonZeroQuantity) {
+      return {
+        success: true,
+        shouldAutoApprove: false,
+        adjustmentNeeded: false,
+        message: 'No product availability data found and all quantities are zero - no adjustment needed',
+        inventoryAdjustment: inventoryAdjustment
+      };
+    }
 
     if (inventoryAdjustment.lot_id) {
         inventoryAdjustment.Lines.forEach((line) => {
