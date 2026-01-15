@@ -8,9 +8,29 @@ function handler(params) {
     const allUndefined = !createPickResult && !createPackResult && !createShipmentResult;
 
     if (allUndefined) {
+      // Get cin7Id (TaskID) from params.data.var.taskId
+      const cin7Id = params.data?.var?.taskId || null;
+
+      // Extract cin7Key: last 5 digits of TaskID prepended to params.data.var.cin7Key
+      let cin7Key = params.data?.var?.cin7Key || "";
+      if (cin7Id) {
+        const last5Digits = cin7Id.toString().slice(-5);
+        cin7Key = `${last5Digits}:${cin7Key}`;
+      }
+
+      // Get parentReferenceKey from params.data.var.referenceKey
+      const parentReferenceKey = params.data?.var?.referenceKey || "";
+
+      // Build referenceKey
+      const referenceKey = parentReferenceKey ? `${parentReferenceKey}:${cin7Id}` : "";
+
       return {
         syncStatus: "Success",
-        message: "No changes needed to be synced"
+        message: "No changes needed to be synced",
+        cin7Id,
+        cin7Key,
+        referenceKey,
+        parentReferenceKey
       };
     }
 
@@ -131,16 +151,8 @@ function handler(params) {
         : "Failed to sync updates from Trackstar";
     }
 
-    // Extract cin7Id (TaskID) from any of the results
-    let cin7Id = null;
-    if (createPickResult?.output?.TaskID) {
-      cin7Id = createPickResult.output.TaskID;
-    } else if (createPackResult?.output?.TaskID) {
-      cin7Id = createPackResult.output.TaskID;
-    } else if (createShipmentResult?.output?.TaskID) {
-      cin7Id = createShipmentResult.output.TaskID;
-    }
-
+    // Get cin7Id (TaskID) from params.data.var.taskId
+    const cin7Id = params.data?.var?.taskId || null;
     // Extract cin7Key: last 5 digits of TaskID prepended to params.data.var.cin7Key
     let cin7Key = params.data?.var?.cin7Key || "";
     if (cin7Id) {
@@ -151,11 +163,15 @@ function handler(params) {
     // Get parentReferenceKey from params.data.var.referenceKey
     const parentReferenceKey = params.data?.var?.referenceKey || "";
 
+    // Build referenceKey
+    const referenceKey = parentReferenceKey ? `${parentReferenceKey}:${cin7Id}` : "";
+
     return {
       syncStatus,
       message,
       cin7Id,
       cin7Key,
+      referenceKey,
       parentReferenceKey
     };
   }

@@ -39,20 +39,12 @@ function handler(params) {
           return "";
       }
 
-      // Start with required ID field only
+      // Start with base payload structure
       let payload = {
-          saleUpdate: {
-              body: {
-                  ID: taskId,
-                  Customer: data?.trading_partner
-                          || data?.ship_to_address?.full_name
-                          || data?.ship_to_address?.company
-                          || ""
-              }
-          }
+          saleId: taskId
       };
 
-      // If no previous_attributes and not a direct trigger, return just the ID (no changes to update)
+      // If no previous_attributes and not a direct trigger, return just saleId
       if (!previous_attributes && !isDirectTrigger) {
           return payload;
       }
@@ -200,35 +192,50 @@ function handler(params) {
           }));
       }
 
-      // ===== PICK ITEMS =====
-      // Check if any line item's is_picked status changed from false to true
-      const isPickedChanged = Array.from(changedFields).some(key =>
-          key.includes('is_picked')
-      );
+      // ===== DETERMINE SALE TYPE (Simple vs Advanced) EARLY =====
+      // We need to determine this before processing shipments to know if TaskID should be included
+      // Determine if multi-fulfillment based on:
+      // 1. Multiple shipments exist (already fulfilled in multiple shipments)
+      // 2. Partial fulfillment (shipped < ordered, expecting more shipments)
+      let saleType = "Simple"; // Default to Simple (single fulfillment)
 
-      if (isPickedChanged && data.line_items) {
-          // Check if items are now picked
-          const hasPickedItems = data.line_items.some(item => item.is_picked === true);
+      // Check if multiple shipments exist
+      if (data.shipments && data.shipments.length > 1) {
+          saleType = "Advanced";
+      } else if (data.line_items && data.line_items.length > 0) {
+          // If only one or no shipments, check if partial fulfillment
+          // Build a map of ordered quantities by SKU
+          const orderedQtyMap = {};
+          data.line_items.forEach(item => {
+              orderedQtyMap[item.sku] = (orderedQtyMap[item.sku] || 0) + item.quantity;
+          });
 
-          if (hasPickedItems) {
-              // Get warehouse name for the location
-              const warehouseName = getWarehouseName(data.warehouse_id);
-
-              // Create SalePick payload - this must happen BEFORE Pack and Ship
-              payload.salePick = {
-                  endpoint: "POST /salepick",
-                  body: {
-                      TaskID: taskId,
-                      Status: "AUTHORISED",
-                      Lines: data.line_items
-                          .filter(item => item.is_picked === true)
-                          .map(item => ({
-                              SKU: item.sku,
-                              Location: warehouseName,
-                              Quantity: item.quantity
-                          }))
+          // Calculate shipped quantities by SKU from all shipments
+          const shippedQtyMap = {};
+          if (data.shipments && data.shipments.length > 0) {
+              data.shipments.forEach(shipment => {
+                  if (shipment.packages && shipment.packages.length > 0) {
+                      shipment.packages.forEach(pkg => {
+                          if (pkg.line_items && pkg.line_items.length > 0) {
+                              pkg.line_items.forEach(item => {
+                                  shippedQtyMap[item.sku] = (shippedQtyMap[item.sku] || 0) + item.quantity;
+                              });
+                          }
+                      });
                   }
-              };
+              });
+          }
+
+          // Compare ordered vs shipped quantities for each SKU
+          for (let sku in orderedQtyMap) {
+              const ordered = orderedQtyMap[sku];
+              const shipped = shippedQtyMap[sku] || 0;
+
+              if (shipped < ordered) {
+                  // Not fully fulfilled - expecting more shipments in the future
+                  saleType = "Advanced";
+                  break;
+              }
           }
       }
 
@@ -382,53 +389,62 @@ function handler(params) {
                       });
                   }
 
+                  // Build operation bodies - conditionally include TaskID based on saleType
+                  const salePickBody = {
+                      Status: "AUTHORISED",
+                      Lines: pickLines
+                  };
+                  const salePackBody = {
+                      Status: "AUTHORISED",
+                      Lines: packLines
+                  };
+                  const saleShipBody = {
+                      Status: "AUTHORISED",
+                      RequireBy: null,
+                      ShippingAddress: {
+                          DisplayAddressLine1: data.ship_to_address?.address1 || "",
+                          DisplayAddressLine2: [
+                              data.ship_to_address?.city,
+                              data.ship_to_address?.state,
+                              data.ship_to_address?.postal_code,
+                              data.ship_to_address?.country
+                          ].filter(Boolean).join(' '),
+                          Line1: data.ship_to_address?.address1 || "",
+                          Line2: data.ship_to_address?.address2 || "",
+                          City: data.ship_to_address?.city || "",
+                          State: data.ship_to_address?.state || "",
+                          Postcode: data.ship_to_address?.postal_code || "",
+                          Country: data.ship_to_address?.country || "",
+                          Company: data.ship_to_address?.company || "",
+                          Contact: data.ship_to_address?.full_name || "",
+                          ShipToOther: false
+                      },
+                      ShippingNotes: `Shipment Status: ${shipment.status || 'shipped'}`,
+                      Lines: shipLines
+                  };
+
+                  // Add TaskID only if saleType is Simple
+                  if (saleType === "Simple") {
+                      salePickBody.TaskID = taskId;
+                      salePackBody.TaskID = taskId;
+                      saleShipBody.TaskID = taskId;
+                  }
+
                   // Add this shipment's operations to the array
                   shipmentOperations.push({
                       trackstarId: trackstarId,
                       trackstarKey: trackstarKey,
                       salePick: pickLines.length > 0 ? {
                           endpoint: "POST /salepick",
-                          body: {
-                              TaskID: taskId,
-                              Status: "AUTHORISED",
-                              Lines: pickLines
-                          }
+                          body: salePickBody
                       } : null,
                       salePack: packLines.length > 0 ? {
                           endpoint: "POST /salepack",
-                          body: {
-                              TaskID: taskId,
-                              Status: "AUTHORISED",
-                              Lines: packLines
-                          }
+                          body: salePackBody
                       } : null,
                       saleShip: shipLines.length > 0 ? {
                           endpoint: "POST /saleship",
-                          body: {
-                              TaskID: taskId,
-                              Status: "AUTHORISED",
-                              RequireBy: null,
-                              ShippingAddress: {
-                                  DisplayAddressLine1: data.ship_to_address?.address1 || "",
-                                  DisplayAddressLine2: [
-                                      data.ship_to_address?.city,
-                                      data.ship_to_address?.state,
-                                      data.ship_to_address?.postal_code,
-                                      data.ship_to_address?.country
-                                  ].filter(Boolean).join(' '),
-                                  Line1: data.ship_to_address?.address1 || "",
-                                  Line2: data.ship_to_address?.address2 || "",
-                                  City: data.ship_to_address?.city || "",
-                                  State: data.ship_to_address?.state || "",
-                                  Postcode: data.ship_to_address?.postal_code || "",
-                                  Country: data.ship_to_address?.country || "",
-                                  Company: data.ship_to_address?.company || "",
-                                  Contact: data.ship_to_address?.full_name || "",
-                                  ShipToOther: false
-                              },
-                              ShippingNotes: `Shipment Status: ${shipment.status || 'shipped'}`,
-                              Lines: shipLines
-                          }
+                          body: saleShipBody
                       } : null
                   });
               });
@@ -438,98 +454,8 @@ function handler(params) {
           }
       }
 
-      // ===== STATUS CHANGES =====
-      // If order status changes to specific values, might need invoice endpoint
-      if (wasFieldChanged('status')) {
-          const status = data.status?.toLowerCase();
-
-          // If order is fulfilled/invoiced, create invoice payload
-          if (status === 'fulfilled' || status === 'invoiced') {
-              payload.saleInvoice = {
-                  endpoint: "POST /sale/invoice",
-                  body: {
-                      TaskID: taskId,
-                      InvoiceDate: data.updated_date || new Date().toISOString(),
-                      InvoiceDueDate: data.updated_date || new Date().toISOString()
-                  }
-              };
-          }
-
-          // If order is cancelled
-          if (status === 'cancelled' || status === 'voided') {
-              payload.saleVoid = {
-                  endpoint: "POST /sale/void",
-                  body: {
-                      TaskID: taskId
-                  }
-              };
-          }
-      }
-
-      // ===== ADDITIONAL FIELDS =====
-
-      if (wasFieldChanged('saturday_delivery')) {
-          const saturdayNote = `Saturday Delivery: ${data.saturday_delivery}`;
-          changes.ShippingNotes = changes.ShippingNotes
-              ? `${changes.ShippingNotes}\n${saturdayNote}`
-              : saturdayNote;
-      }
-
-      if (wasFieldChanged('signature_required')) {
-          const signatureNote = `Signature Required: ${data.signature_required}`;
-          changes.ShippingNotes = changes.ShippingNotes
-              ? `${changes.ShippingNotes}\n${signatureNote}`
-              : signatureNote;
-      }
-
-      // Merge ID with only the changed fields
-      payload.saleUpdate.body = {
-          ...payload.saleUpdate.body,
-          ...changes
-      };
-
-      // ===== DETERMINE SALE TYPE (Simple vs Advanced) =====
-      // Compare ordered quantities vs shipped quantities to determine if multi-fulfillment is expected
-      let sale_type = "Simple"; // Default to Simple (single fulfillment)
-
-      if (data.line_items && data.line_items.length > 0) {
-          // Build a map of ordered quantities by SKU
-          const orderedQtyMap = {};
-          data.line_items.forEach(item => {
-              orderedQtyMap[item.sku] = (orderedQtyMap[item.sku] || 0) + item.quantity;
-          });
-
-          // Calculate shipped quantities by SKU from all shipments
-          const shippedQtyMap = {};
-          if (data.shipments && data.shipments.length > 0) {
-              data.shipments.forEach(shipment => {
-                  if (shipment.packages && shipment.packages.length > 0) {
-                      shipment.packages.forEach(pkg => {
-                          if (pkg.line_items && pkg.line_items.length > 0) {
-                              pkg.line_items.forEach(item => {
-                                  shippedQtyMap[item.sku] = (shippedQtyMap[item.sku] || 0) + item.quantity;
-                              });
-                          }
-                      });
-                  }
-              });
-          }
-
-          // Compare ordered vs shipped quantities for each SKU
-          for (let sku in orderedQtyMap) {
-              const ordered = orderedQtyMap[sku];
-              const shipped = shippedQtyMap[sku] || 0;
-
-              if (shipped < ordered) {
-                  // Not fully fulfilled - expecting more shipments in the future
-                  sale_type = "Advanced";
-                  break;
-              }
-          }
-      }
-
-      // Add sale_type to the payload
-      payload.sale_type = sale_type;
+      // Add saleType to the payload (already determined earlier)
+      payload.saleType = saleType;
 
       return payload;
   }

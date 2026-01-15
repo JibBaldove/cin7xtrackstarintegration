@@ -5,11 +5,18 @@ export interface Webhook {
   status: 'Active' | 'Inactive';
 }
 
+// Schedule configuration
+export interface Schedule {
+  status: 'Active' | 'Inactive';
+  interval: string; // in hours
+}
+
 // Sync configuration for different entities
 export interface SyncConfig {
   entity: 'sale' | 'purchase' | 'inventory' | 'transfer' | 'product';
   status: 'Active' | 'Inactive';
   webhook?: Webhook[];
+  schedule?: Schedule;
   // Inventory-specific fields
   quantityType?: 'onhand' | 'available';
   locationScope?: 'mapped' | 'all';
@@ -41,6 +48,7 @@ export interface LocationMapping {
   warehouses: WarehouseMapping[];
   connectionId: string;
   substitutionList?: SubstitutionList[];
+  default3PLShippingMethod?: string;
 }
 
 // Options for dropdowns

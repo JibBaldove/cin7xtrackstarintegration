@@ -1,4 +1,4 @@
-import type { SyncConfig, Webhook } from '../types/config';
+import type { SyncConfig, Webhook, Schedule } from '../types/config';
 
 interface Props {
   syncConfig: SyncConfig[];
@@ -59,6 +59,14 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
     onChange(updated);
   };
 
+  const updateSchedule = (syncIndex: number, field: keyof Schedule, value: any) => {
+    const updated = [...syncConfig];
+    const schedule = { ...(updated[syncIndex].schedule || { status: 'Inactive', interval: '' }) };
+    schedule[field] = value;
+    updated[syncIndex] = { ...updated[syncIndex], schedule };
+    onChange(updated);
+  };
+
   const addSyncConfig = () => {
     onChange([...syncConfig, {
       entity: 'sale',
@@ -70,6 +78,16 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
   // Check if entity has webhooks
   const hasWebhooks = (entity: string) => {
     return ['sale', 'purchase'].includes(entity);
+  };
+
+  // Check if entity requires schedule
+  const requiresSchedule = (entity: string) => {
+    return ['inventory', 'transfer'].includes(entity);
+  };
+
+  // Check if entity supports schedule
+  const supportsSchedule = (entity: string) => {
+    return ['sale', 'purchase', 'inventory', 'transfer'].includes(entity);
   };
 
   const removeSyncConfig = (index: number) => {
@@ -289,6 +307,71 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
               <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#666' }}>
                 <p style={{ margin: '0.25rem 0' }}>
                   <strong>Note:</strong> When unchecked, you are not able to force sync orders with Cin7 status 'Completed' or 'Fulfilled'
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* Schedule configuration */}
+          {supportsSchedule(sync.entity) && (
+            <div style={{
+              backgroundColor: '#f0fff4',
+              border: '1px solid #b3e6cc',
+              borderRadius: '4px',
+              padding: '1rem',
+              marginBottom: '1rem'
+            }}>
+              <h4 style={{ margin: '0 0 0.75rem 0', fontSize: '0.875rem', color: '#006600' }}>
+                Schedule Settings {requiresSchedule(sync.entity) && <span style={{ color: '#cc0000' }}>*</span>}
+              </h4>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', fontWeight: '500' }}>
+                    Status {requiresSchedule(sync.entity) && <span style={{ color: '#cc0000' }}>*</span>}
+                  </label>
+                  <select
+                    value={sync.schedule?.status || 'Inactive'}
+                    onChange={(e) => updateSchedule(syncIndex, 'status', e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', marginBottom: '0.25rem', fontSize: '0.875rem', fontWeight: '500' }}>
+                    Interval (hours) {requiresSchedule(sync.entity) && <span style={{ color: '#cc0000' }}>*</span>}
+                  </label>
+                  <input
+                    type="number"
+                    value={sync.schedule?.interval || ''}
+                    onChange={(e) => updateSchedule(syncIndex, 'interval', e.target.value)}
+                    min="1"
+                    step="1"
+                    placeholder="e.g., 4"
+                    style={{
+                      width: '100%',
+                      padding: '0.5rem',
+                      border: '1px solid #ddd',
+                      borderRadius: '4px',
+                      fontSize: '0.875rem',
+                      boxSizing: 'border-box'
+                    }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: '#666' }}>
+                <p style={{ margin: '0.25rem 0' }}>
+                  <strong>Schedule:</strong> Configure periodic sync interval in hours. {requiresSchedule(sync.entity) ? 'Required for this entity type.' : 'Optional for this entity type.'}
                 </p>
               </div>
             </div>

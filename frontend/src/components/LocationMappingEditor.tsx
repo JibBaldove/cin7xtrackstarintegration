@@ -407,6 +407,31 @@ export function LocationMappingEditor({
             )}
           </div>
 
+          {/* Default 3PL Shipping Method */}
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
+              Default 3PL Shipping Method
+            </label>
+            <input
+              type="text"
+              value={location.default3PLShippingMethod || ''}
+              onChange={(e) => updateLocationMapping(locationIndex, 'default3PLShippingMethod', e.target.value)}
+              placeholder="e.g., Standard Shipping"
+              style={{
+                width: '100%',
+                padding: '0.5rem',
+                border: '1px solid #ddd',
+                borderRadius: '4px',
+                fontSize: '0.875rem',
+                boxSizing: 'border-box',
+                backgroundColor: 'white'
+              }}
+            />
+            <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: '#666' }}>
+              Specify the default 3PL shipping method for this connection
+            </div>
+          </div>
+
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
               <label style={{ fontWeight: '500' }}>Substitution Lists</label>
