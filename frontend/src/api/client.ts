@@ -260,6 +260,27 @@ export class ApiClient {
     return response.data;
   }
 
+  async resyncInventoryPull(trackstarSku: string, connectionId?: string) {
+    if (!this.tenantId) {
+      throw new Error('Tenant ID not set');
+    }
+
+    const inventoryUrl = 'https://live.fastn.ai/api/v1/clients/d0f8c7f3-69d3-403c-90a0-17c8857e095f/webhooks/sync_inventory_trackstarxcin7';
+    const headers: any = {
+      'x-fastn-space-tenantid': this.tenantId,
+      'x-fastn-space-connection-id': connectionId || 'default',
+      'Content-Type': 'application/json'
+    };
+    const payload = {
+      data: {
+        sku: trackstarSku
+      }
+    };
+
+    const response = await axios.post(inventoryUrl, payload, { headers });
+    return response.data;
+  }
+
   async getTenantList(): Promise<string[]> {
     const response = await this.client.post('/get_cin7_trackstar_tenants', {
       input: {}

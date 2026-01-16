@@ -317,23 +317,32 @@ export function SyncHistoryPage() {
       const isPull = record.last_sync_action === 'PULL';
 
       if (isPull) {
-        // For PULL actions, use trackstar_id
-        if (!record.trackstar_id || record.trackstar_id === 'null') {
-          throw new Error('No Trackstar ID available for PULL action');
-        }
+        // For PULL actions, use trackstar_id (or trackstar_key for inventory)
+        if (record.type === 'inventory') {
+          // Inventory uses SKU (trackstar_key) instead of ID
+          if (!record.trackstar_key) {
+            throw new Error('No Trackstar SKU available for inventory sync');
+          }
+          await apiClient.resyncInventoryPull(record.trackstar_key, connectionId);
+        } else {
+          // Other entities use trackstar_id
+          if (!record.trackstar_id || record.trackstar_id === 'null') {
+            throw new Error('No Trackstar ID available for PULL action');
+          }
 
-        switch (record.type) {
-          case 'sale':
-            await apiClient.resyncSalePull(record.trackstar_id, connectionId);
-            break;
-          case 'purchase':
-            await apiClient.resyncPurchasePull(record.trackstar_id, connectionId);
-            break;
-          case 'transfer':
-            await apiClient.resyncTransferPull(record.trackstar_id, connectionId);
-            break;
-          default:
-            throw new Error(`PULL resync not implemented for type: ${record.type}`);
+          switch (record.type) {
+            case 'sale':
+              await apiClient.resyncSalePull(record.trackstar_id, connectionId);
+              break;
+            case 'purchase':
+              await apiClient.resyncPurchasePull(record.trackstar_id, connectionId);
+              break;
+            case 'transfer':
+              await apiClient.resyncTransferPull(record.trackstar_id, connectionId);
+              break;
+            default:
+              throw new Error(`PULL resync not implemented for type: ${record.type}`);
+          }
         }
 
         setSuccessMessage(`Successfully triggered PULL resync for ${record.trackstar_key || record.trackstar_id}`);
@@ -713,17 +722,18 @@ export function SyncHistoryPage() {
                             <div>{record.trackstar_key || '-'}</div>
                             <div
                               style={{ fontSize: '0.75rem', color: '#999', fontFamily: 'monospace', cursor: 'help' }}
-                              title={record.trackstar_id}
+                              title={record.type === 'inventory' ? record.trackstar_key : record.trackstar_id}
                             >
-                              {truncateId(record.trackstar_id)}
+                              {record.type === 'inventory' ? record.trackstar_key : truncateId(record.trackstar_id)}
                             </div>
                           </div>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              copyToClipboard(record.trackstar_id!, `trackstar-${record.record_id}`);
+                              const valueToCopy = record.type === 'inventory' ? record.trackstar_key! : record.trackstar_id!;
+                              copyToClipboard(valueToCopy, `trackstar-${record.record_id}`);
                             }}
-                            title="Copy Trackstar ID to clipboard"
+                            title={record.type === 'inventory' ? 'Copy Trackstar SKU to clipboard' : 'Copy Trackstar ID to clipboard'}
                             style={{
                               background: 'none',
                               border: '1px solid #ddd',
@@ -839,17 +849,18 @@ export function SyncHistoryPage() {
                               <div>{child.trackstar_key || '-'}</div>
                               <div
                                 style={{ fontSize: '0.75rem', color: '#999', fontFamily: 'monospace', cursor: 'help' }}
-                                title={child.trackstar_id}
+                                title={child.type === 'inventory' ? child.trackstar_key : child.trackstar_id}
                               >
-                                {truncateId(child.trackstar_id)}
+                                {child.type === 'inventory' ? child.trackstar_key : truncateId(child.trackstar_id)}
                               </div>
                             </div>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
-                                copyToClipboard(child.trackstar_id!, `trackstar-${child.record_id}`);
+                                const valueToCopy = child.type === 'inventory' ? child.trackstar_key! : child.trackstar_id!;
+                                copyToClipboard(valueToCopy, `trackstar-${child.record_id}`);
                               }}
-                              title="Copy Trackstar ID to clipboard"
+                              title={child.type === 'inventory' ? 'Copy Trackstar SKU to clipboard' : 'Copy Trackstar ID to clipboard'}
                               style={{
                                 background: 'none',
                                 border: '1px solid #ddd',
