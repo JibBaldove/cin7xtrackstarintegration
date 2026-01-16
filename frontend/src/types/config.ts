@@ -11,7 +11,7 @@ export interface SyncConfig {
   status: 'Active' | 'Inactive';
   webhook?: Webhook[];
   // Inventory-specific fields
-  quantityType?: 'onhand' | 'available';
+  quantityType?: 'onhand' | 'sellable' | 'fulfillable';
   locationScope?: 'mapped' | 'all';
   autoAcceptThreshold?: number;
 }
