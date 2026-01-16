@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { Card, TextField, Button, Banner, BlockStack, InlineStack, Text, Badge, Icon } from '@shopify/polaris';
+import { CheckIcon, XIcon } from '@shopify/polaris-icons';
 
 interface Props {
   apiKey: string;
@@ -21,8 +23,7 @@ export function SettingsEditor({
   const [apiKeyError, setApiKeyError] = useState('');
   const [apiKeySuccess, setApiKeySuccess] = useState(false);
 
-  const handleApiKeySave = async () => {
-    // Validate API key is not empty
+  const handleApiKeySave = useCallback(async () => {
     if (!newApiKey.trim()) {
       setApiKeyError('Please enter a valid API key');
       return;
@@ -32,262 +33,167 @@ export function SettingsEditor({
       setApiKeyError('');
       setApiKeySuccess(false);
       await onApiKeySave(newApiKey);
-      // Clear input and show success
       setNewApiKey('');
       setApiKeySuccess(true);
       setTimeout(() => setApiKeySuccess(false), 3000);
     } catch (err) {
       setApiKeyError('Failed to update API key. Please try again.');
     }
-  };
+  }, [newApiKey, onApiKeySave]);
 
-  const addRecipient = () => {
+  const addRecipient = useCallback(() => {
     onNotificationRecipientChange([...notificationRecipient, '']);
-  };
+  }, [notificationRecipient, onNotificationRecipientChange]);
 
-  const updateRecipient = (index: number, value: string) => {
+  const updateRecipient = useCallback((index: number, value: string) => {
     const updated = [...notificationRecipient];
     updated[index] = value;
     onNotificationRecipientChange(updated);
-  };
+  }, [notificationRecipient, onNotificationRecipientChange]);
 
-  const removeRecipient = (index: number) => {
+  const removeRecipient = useCallback((index: number) => {
     onNotificationRecipientChange(notificationRecipient.filter((_, i) => i !== index));
-  };
+  }, [notificationRecipient, onNotificationRecipientChange]);
 
   return (
-    <div>
+    <BlockStack gap="400">
       {/* API Key Section */}
-      <div style={{
-        border: '1px solid #ddd',
-        borderRadius: '4px',
-        padding: '1.5rem',
-        marginBottom: '1.5rem',
-        backgroundColor: '#fafafa'
-      }}>
-        <h2 style={{ margin: '0 0 1rem 0' }}>API Key</h2>
+      <Card>
+        <BlockStack gap="400">
+          <Text as="h2" variant="headingMd">API Key</Text>
 
-        <div style={{ marginBottom: '1rem' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '0.5rem',
-            marginBottom: '0.5rem'
-          }}>
-            <label style={{ fontWeight: '500' }}>Current Status:</label>
-            {hasApiKey ? (
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                color: '#28a745',
-                fontSize: '0.875rem'
-              }}>
-                <span style={{ fontSize: '1rem' }}>✓</span> API Key Configured
-              </span>
-            ) : (
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.25rem',
-                color: '#dc3545',
-                fontSize: '0.875rem'
-              }}>
-                <span style={{ fontSize: '1rem' }}>✗</span> No API Key Set
-              </span>
-            )}
-          </div>
+          <BlockStack gap="200">
+            <InlineStack gap="200" blockAlign="center">
+              <Text as="span" variant="bodyMd" fontWeight="semibold">
+                Current Status:
+              </Text>
+              {hasApiKey ? (
+                <Badge tone="success" icon={CheckIcon}>API Key Configured</Badge>
+              ) : (
+                <Badge tone="critical" icon={XIcon}>No API Key Set</Badge>
+              )}
+            </InlineStack>
 
-          <div style={{
-            backgroundColor: 'white',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-            padding: '0.75rem',
-            fontFamily: 'monospace',
-            fontSize: '0.875rem',
-            color: '#666',
-            overflowX: 'auto'
-          }}>
-            {apiKey || 'Not set'}
-          </div>
-        </div>
-
-        <div style={{
-          border: '1px solid #ddd',
-          borderRadius: '4px',
-          padding: '1rem',
-          backgroundColor: 'white'
-        }}>
-          <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>Update API Key</h3>
-
-          {apiKeySuccess && (
             <div style={{
-              backgroundColor: '#d4edda',
-              border: '1px solid #c3e6cb',
-              borderRadius: '4px',
-              padding: '0.75rem',
-              marginBottom: '1rem',
+              backgroundColor: 'var(--p-color-bg-surface-secondary)',
+              padding: '12px',
+              borderRadius: 'var(--p-border-radius-200)',
+              fontFamily: 'monospace',
               fontSize: '0.875rem',
-              color: '#155724'
+              overflowX: 'auto'
             }}>
-              <strong>✓ Success:</strong> API Key updated successfully!
+              {apiKey || 'Not set'}
             </div>
-          )}
+          </BlockStack>
 
-          {apiKeyError && (
-            <div style={{
-              backgroundColor: '#f8d7da',
-              border: '1px solid #f5c6cb',
-              borderRadius: '4px',
-              padding: '0.75rem',
-              marginBottom: '1rem',
-              fontSize: '0.875rem',
-              color: '#721c24'
-            }}>
-              <strong>✗ Error:</strong> {apiKeyError}
-            </div>
-          )}
+          <Card background="bg-surface-secondary">
+            <BlockStack gap="400">
+              <Text as="h3" variant="headingSm">Update API Key</Text>
 
-          <p style={{
-            fontSize: '0.875rem',
-            color: '#666',
-            margin: '0 0 0.5rem 0'
-          }}>
-            Enter a new API key below. This will replace the current API key.
-          </p>
+              {apiKeySuccess && (
+                <Banner
+                  title="Success"
+                  tone="success"
+                  onDismiss={() => setApiKeySuccess(false)}
+                >
+                  API Key updated successfully!
+                </Banner>
+              )}
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <input
-              type="password"
-              value={newApiKey}
-              onChange={(e) => {
-                setNewApiKey(e.target.value);
-                setApiKeyError('');
-              }}
-              placeholder="Enter new API key"
-              disabled={savingApiKey}
-              style={{
-                flex: 1,
-                padding: '0.75rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontFamily: 'monospace',
-                fontSize: '0.875rem',
-                boxSizing: 'border-box'
-              }}
-            />
-            <button
-              onClick={handleApiKeySave}
-              disabled={savingApiKey || !newApiKey.trim()}
-              style={{
-                padding: '0.75rem 1.5rem',
-                backgroundColor: savingApiKey || !newApiKey.trim() ? '#ccc' : '#007bff',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: savingApiKey || !newApiKey.trim() ? 'not-allowed' : 'pointer',
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                whiteSpace: 'nowrap'
-              }}
-            >
-              {savingApiKey ? 'Updating...' : 'Update Key'}
-            </button>
-          </div>
-        </div>
-      </div>
+              {apiKeyError && (
+                <Banner
+                  title="Error"
+                  tone="critical"
+                  onDismiss={() => setApiKeyError('')}
+                >
+                  {apiKeyError}
+                </Banner>
+              )}
+
+              <Text as="p" variant="bodySm" tone="subdued">
+                Enter a new API key below. This will replace the current API key.
+              </Text>
+
+              <InlineStack gap="200">
+                <div style={{ flex: 1 }}>
+                  <TextField
+                    label=""
+                    type="password"
+                    value={newApiKey}
+                    onChange={(value) => {
+                      setNewApiKey(value);
+                      setApiKeyError('');
+                    }}
+                    placeholder="Enter new API key"
+                    disabled={savingApiKey}
+                    autoComplete="off"
+                    monospaced
+                  />
+                </div>
+                <Button
+                  variant="primary"
+                  onClick={handleApiKeySave}
+                  disabled={savingApiKey || !newApiKey.trim()}
+                  loading={savingApiKey}
+                >
+                  Update Key
+                </Button>
+              </InlineStack>
+            </BlockStack>
+          </Card>
+        </BlockStack>
+      </Card>
 
       {/* Notification Recipients Section */}
-      <div style={{
-        border: '1px solid #ddd',
-        borderRadius: '4px',
-        padding: '1.5rem',
-        backgroundColor: '#fafafa'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '1rem'
-        }}>
-          <h2 style={{ margin: 0 }}>Notification Recipients</h2>
-          <button
-            onClick={addRecipient}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '0.875rem'
-            }}
-          >
-            + Add Email
-          </button>
-        </div>
+      <Card>
+        <BlockStack gap="400">
+          <InlineStack align="space-between" blockAlign="center">
+            <Text as="h2" variant="headingMd">Notification Recipients</Text>
+            <Button onClick={addRecipient}>Add Email</Button>
+          </InlineStack>
 
-        <p style={{
-          fontSize: '0.875rem',
-          color: '#666',
-          margin: '0 0 1rem 0'
-        }}>
-          Email addresses that will receive notifications about sync activities and errors
-        </p>
+          <Text as="p" variant="bodySm" tone="subdued">
+            Email addresses that will receive notifications about sync activities and errors
+          </Text>
 
-        {notificationRecipient.map((email, index) => (
-          <div
-            key={index}
-            style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr auto',
-              gap: '0.5rem',
-              marginBottom: '0.5rem'
-            }}
-          >
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => updateRecipient(index, e.target.value)}
-              placeholder="email@example.com"
-              style={{
-                padding: '0.5rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '0.875rem'
-              }}
-            />
-            <button
-              onClick={() => removeRecipient(index)}
-              style={{
-                padding: '0.5rem 1rem',
-                backgroundColor: '#dc3545',
-                color: 'white',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '0.875rem'
-              }}
-            >
-              Remove
-            </button>
-          </div>
-        ))}
-
-        {notificationRecipient.length === 0 && (
-          <div style={{
-            textAlign: 'center',
-            padding: '2rem',
-            color: '#666',
-            backgroundColor: 'white',
-            borderRadius: '4px',
-            border: '1px dashed #ddd',
-            fontSize: '0.875rem'
-          }}>
-            No notification recipients configured. Click "Add Email" to add one.
-          </div>
-        )}
-      </div>
-    </div>
+          {notificationRecipient.length > 0 ? (
+            <BlockStack gap="200">
+              {notificationRecipient.map((email, index) => (
+                <InlineStack key={index} gap="200">
+                  <div style={{ flex: 1 }}>
+                    <TextField
+                      label=""
+                      type="email"
+                      value={email}
+                      onChange={(value) => updateRecipient(index, value)}
+                      placeholder="email@example.com"
+                      autoComplete="off"
+                    />
+                  </div>
+                  <Button
+                    tone="critical"
+                    onClick={() => removeRecipient(index)}
+                  >
+                    Remove
+                  </Button>
+                </InlineStack>
+              ))}
+            </BlockStack>
+          ) : (
+            <div style={{
+              textAlign: 'center',
+              padding: '2rem',
+              backgroundColor: 'var(--p-color-bg-surface)',
+              borderRadius: 'var(--p-border-radius-200)',
+              border: '1px dashed var(--p-color-border)'
+            }}>
+              <Text as="p" variant="bodySm" tone="subdued">
+                No notification recipients configured. Click "Add Email" to add one.
+              </Text>
+            </div>
+          )}
+        </BlockStack>
+      </Card>
+    </BlockStack>
   );
 }

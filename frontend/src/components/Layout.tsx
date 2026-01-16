@@ -1,4 +1,6 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useCallback } from 'react';
+import { Frame, TopBar, Navigation } from '@shopify/polaris';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { TenantSwitcher } from './TenantSwitcher';
 
@@ -8,78 +10,81 @@ interface Props {
 
 export function Layout({ children }: Props) {
   const { logout } = useAuth();
+  const navigate = useNavigate();
   const location = useLocation();
+  const [mobileNavigationActive, setMobileNavigationActive] = useState(false);
 
-  const isActive = (path: string) => location.pathname === path;
+  const toggleMobileNavigationActive = useCallback(
+    () => setMobileNavigationActive((active) => !active),
+    []
+  );
 
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f5f5f5' }}>
-      {/* Header */}
-      <header style={{
-        backgroundColor: 'white',
-        borderBottom: '1px solid #ddd',
-        padding: '1rem 2rem',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', color: '#007bff' }}>
-            Cin7 × Trackstar
-          </h1>
-          <nav style={{ display: 'flex', gap: '1rem' }}>
-            <Link
-              to="/dashboard"
-              style={{
-                padding: '0.5rem 1rem',
-                textDecoration: 'none',
-                color: isActive('/dashboard') ? '#007bff' : '#666',
-                fontWeight: isActive('/dashboard') ? '600' : '400',
-                borderBottom: isActive('/dashboard') ? '3px solid #007bff' : '3px solid transparent',
-                transition: 'all 0.2s'
-              }}
-            >
-              Configuration
-            </Link>
-            <Link
-              to="/sync-history"
-              style={{
-                padding: '0.5rem 1rem',
-                textDecoration: 'none',
-                color: isActive('/sync-history') ? '#007bff' : '#666',
-                fontWeight: isActive('/sync-history') ? '600' : '400',
-                borderBottom: isActive('/sync-history') ? '3px solid #007bff' : '3px solid transparent',
-                transition: 'all 0.2s'
-              }}
-            >
-              Sync History
-            </Link>
-          </nav>
-        </div>
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  const logo = {
+    width: 124,
+    topBarSource: undefined,
+    contextualSaveBarSource: undefined,
+    url: '#',
+    accessibilityLabel: 'Cin7 × Trackstar',
+  };
+
+  const topBarMarkup = (
+    <TopBar
+      showNavigationToggle
+      onNavigationToggle={toggleMobileNavigationActive}
+      secondaryMenu={
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <TenantSwitcher />
-          <button
-            onClick={logout}
-            style={{
-              padding: '0.5rem 1rem',
-              backgroundColor: '#dc3545',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '0.875rem',
-              fontWeight: '500'
-            }}
-          >
-            Logout
-          </button>
+          <TopBar.Menu
+            activatorContent="Logout"
+            open={false}
+            onOpen={() => {}}
+            onClose={() => {}}
+            actions={[
+              {
+                items: [{ content: 'Logout', onAction: handleLogout }],
+              },
+            ]}
+          />
         </div>
-      </header>
+      }
+    />
+  );
 
-      {/* Content */}
-      <main>
-        {children}
-      </main>
-    </div>
+  const navigationMarkup = (
+    <Navigation location={location.pathname}>
+      <Navigation.Section
+        items={[
+          {
+            url: '/dashboard',
+            label: 'Configuration',
+            selected: location.pathname === '/dashboard',
+            onClick: () => navigate('/dashboard'),
+          },
+          {
+            url: '/sync-history',
+            label: 'Sync History',
+            selected: location.pathname === '/sync-history',
+            onClick: () => navigate('/sync-history'),
+          },
+        ]}
+      />
+    </Navigation>
+  );
+
+  return (
+    <Frame
+      logo={logo}
+      topBar={topBarMarkup}
+      navigation={navigationMarkup}
+      showMobileNavigation={mobileNavigationActive}
+      onNavigationDismiss={toggleMobileNavigationActive}
+    >
+      {children}
+    </Frame>
   );
 }
