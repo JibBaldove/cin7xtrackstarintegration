@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Page, Banner } from '@shopify/polaris';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../api/client';
 import type { SyncHistoryRecord, EntityType, SyncStatus } from '../types/syncHistory';
@@ -432,11 +433,11 @@ export function SyncHistoryPage() {
   };
 
   return (
-    <div style={{ padding: '2rem', maxWidth: '100%', overflow: 'auto' }}>
-      <div style={{ marginBottom: '2rem' }}>
-        <h1 style={{ margin: '0 0 0.5rem 0' }}>Sync History</h1>
-        <p style={{ margin: 0, color: '#666' }}>View and manage synchronization records for {tenantId}</p>
-      </div>
+    <Page
+      title="Sync History"
+      subtitle={`View and manage synchronization records for ${tenantId}`}
+    >
+      <div style={{ maxWidth: '100%', overflow: 'auto' }}>
 
       {/* Action Filter Tabs (PUSH/PULL/ALL) */}
       <div style={{
@@ -578,28 +579,26 @@ export function SyncHistoryPage() {
       </div>
 
       {error && (
-        <div style={{
-          padding: '1rem',
-          backgroundColor: '#f8d7da',
-          border: '1px solid #f5c6cb',
-          borderRadius: '4px',
-          color: '#721c24',
-          marginBottom: '1rem'
-        }}>
-          {error}
+        <div style={{ marginBottom: '1rem' }}>
+          <Banner
+            title="Error"
+            tone="critical"
+            onDismiss={() => setError('')}
+          >
+            {error}
+          </Banner>
         </div>
       )}
 
       {successMessage && (
-        <div style={{
-          padding: '1rem',
-          backgroundColor: '#d4edda',
-          border: '1px solid #c3e6cb',
-          borderRadius: '4px',
-          color: '#155724',
-          marginBottom: '1rem'
-        }}>
-          {successMessage}
+        <div style={{ marginBottom: '1rem' }}>
+          <Banner
+            title="Success"
+            tone="success"
+            onDismiss={() => setSuccessMessage('')}
+          >
+            {successMessage}
+          </Banner>
         </div>
       )}
 
@@ -959,6 +958,7 @@ export function SyncHistoryPage() {
       <div style={{ marginTop: '1rem', color: '#666', fontSize: '0.875rem' }}>
         Showing {filteredRecords.length} of {organizedRecords.length} records
       </div>
-    </div>
+      </div>
+    </Page>
   );
 }

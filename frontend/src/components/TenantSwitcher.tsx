@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Text, Spinner, InlineStack } from '@shopify/polaris';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../api/client';
 import { SearchableSelect } from './SearchableSelect';
@@ -46,17 +47,20 @@ export function TenantSwitcher() {
 
   if (loading) {
     return (
-      <div style={{ fontSize: '0.875rem', color: '#666' }}>
-        Loading tenants...
-      </div>
+      <InlineStack gap="200" blockAlign="center">
+        <Spinner size="small" />
+        <Text as="span" variant="bodySm" tone="subdued">
+          Loading tenants...
+        </Text>
+      </InlineStack>
     );
   }
 
   if (error && tenants.length === 0) {
     return (
-      <div style={{ fontSize: '0.875rem', color: '#dc3545' }}>
+      <Text as="span" variant="bodySm" tone="critical">
         {error}
-      </div>
+      </Text>
     );
   }
 
@@ -64,9 +68,9 @@ export function TenantSwitcher() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', minWidth: '200px' }}>
-      <div style={{ fontSize: '0.75rem', color: '#666', fontWeight: '500' }}>
+      <Text as="p" variant="bodyXs" fontWeight="semibold" tone="subdued">
         TENANT
-      </div>
+      </Text>
       <SearchableSelect
         options={tenantOptions}
         value={tenantId || ''}
@@ -75,9 +79,9 @@ export function TenantSwitcher() {
         disabled={switching}
       />
       {error && switching && (
-        <div style={{ fontSize: '0.75rem', color: '#dc3545', marginTop: '0.25rem' }}>
+        <Text as="p" variant="bodyXs" tone="critical">
           {error}
-        </div>
+        </Text>
       )}
     </div>
   );
