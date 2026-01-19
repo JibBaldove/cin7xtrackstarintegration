@@ -55,8 +55,18 @@ function handler(params) {
         const warehouse = warehouses[0]; // Should only be 1 warehouse when scope is 'all'
         let totalQuantity = 0;
 
+        // Add lotted inventory
         for (const lot of trackstarInventory.lots) {
           totalQuantity += lot.onhand;
+        }
+
+        // ✅ FIX: Also include non-lotted inventory
+        // Calculate non-lotted inventory = total onhand - sum of lots
+        const lottedTotal = trackstarInventory.lots.reduce((sum, lot) => sum + lot.onhand, 0);
+        const nonLottedInventory = trackstarInventory.onhand - lottedTotal;
+
+        if (nonLottedInventory > 0) {
+          totalQuantity += nonLottedInventory;
         }
 
         const result = {
@@ -78,9 +88,10 @@ function handler(params) {
         adjustments.push(result);
       } else {
         // Mapped scope: Consolidate lots per location
-        // If we have 4 lots per location, we will total the stocks
+        // Build a map of location -> total quantity (lots + non-lotted)
         const locationMap = new Map();
 
+        // First, add lotted inventory per location
         for (const lot of trackstarInventory.lots) {
           const warehouse = warehouses.find(w => w.warehouseId === lot.warehouse_id);
 
@@ -91,10 +102,8 @@ function handler(params) {
           const locationKey = warehouse.id;
 
           if (locationMap.has(locationKey)) {
-            // Add quantity to existing location
             locationMap.get(locationKey).quantity += lot.onhand;
           } else {
-            // Create new location entry
             locationMap.set(locationKey, {
               locationName: warehouse.id,
               warehouseId: lot.warehouse_id,
@@ -103,12 +112,46 @@ function handler(params) {
           }
         }
 
+        // ✅ FIX: Add non-lotted inventory per warehouse
+        // Calculate total lotted inventory per warehouse
+        const lottedByWarehouse = {};
+        for (const lot of trackstarInventory.lots) {
+          if (!lottedByWarehouse[lot.warehouse_id]) {
+            lottedByWarehouse[lot.warehouse_id] = 0;
+          }
+          lottedByWarehouse[lot.warehouse_id] += lot.onhand;
+        }
+
+        // Add non-lotted inventory to each warehouse
+        for (const warehouse of warehouses) {
+          const warehouseInventory = trackstarInventory.inventory_by_warehouse_id?.[warehouse.warehouseId];
+          if (!warehouseInventory) continue;
+
+          const totalOnhand = warehouseInventory[quantityType] || 0;
+          const lottedOnhand = lottedByWarehouse[warehouse.warehouseId] || 0;
+          const nonLottedOnhand = totalOnhand - lottedOnhand;
+
+          if (nonLottedOnhand > 0) {
+            const locationKey = warehouse.id;
+
+            if (locationMap.has(locationKey)) {
+              locationMap.get(locationKey).quantity += nonLottedOnhand;
+            } else {
+              locationMap.set(locationKey, {
+                locationName: warehouse.id,
+                warehouseId: warehouse.warehouseId,
+                quantity: nonLottedOnhand
+              });
+            }
+          }
+        }
+
         // Convert map to results array - one inventory adjustment per location
         for (const [locationKey, locationData] of locationMap) {
           const result = {
             locationName: locationData.locationName,
             warehouseId: locationData.warehouseId,
-            note: 'Trackstar lotted inventory per location consolidated due to Cin7 product not supporting Batch/Serials (Non-FIFO costing method)',
+            note: 'Trackstar lotted inventory per location consolidated due to Cin7 product not supporting Batch/Serials (FIFO costing method)',
             Lines: [{
               SKU: trackstarInventory.sku,
               ProductName: trackstarInventory.name,
@@ -151,6 +194,71 @@ function handler(params) {
         };
 
         adjustments.push(result);
+      }
+
+      // ✅ FIX: Also add non-lotted inventory as separate adjustments
+      // Calculate total lotted inventory per warehouse
+      const lottedByWarehouse = {};
+      for (const lot of trackstarInventory.lots) {
+        if (!lottedByWarehouse[lot.warehouse_id]) {
+          lottedByWarehouse[lot.warehouse_id] = 0;
+        }
+        lottedByWarehouse[lot.warehouse_id] += lot.onhand;
+      }
+
+      // Add non-lotted inventory per warehouse (without lot_id)
+      if (locationScope === 'all') {
+        const warehouse = warehouses[0];
+        const totalOnhand = trackstarInventory[quantityType] || 0;
+        const lottedOnhand = Object.values(lottedByWarehouse).reduce((sum, qty) => sum + qty, 0);
+        const nonLottedOnhand = totalOnhand - lottedOnhand;
+
+        if (nonLottedOnhand > 0) {
+          const result = {
+            locationName: warehouse.id,
+            warehouseId: warehouse.warehouseId,
+            Lines: [{
+              SKU: trackstarInventory.sku,
+              ProductName: trackstarInventory.name,
+              Quantity: nonLottedOnhand,
+              UnitCost: trackstarInventory.unit_cost || 1,
+              ProductLength: trackstarInventory.measurements?.length || 1,
+              ProductWidth: trackstarInventory.measurements?.width || 1,
+              ProductHeight: trackstarInventory.measurements?.height || 1,
+              ProductWeight: trackstarInventory.measurements?.weight || 1
+            }]
+          };
+
+          adjustments.push(result);
+        }
+      } else {
+        for (const warehouse of warehouses) {
+          const warehouseInventory = trackstarInventory.inventory_by_warehouse_id?.[warehouse.warehouseId];
+          if (!warehouseInventory) continue;
+
+          const totalOnhand = warehouseInventory[quantityType] || 0;
+          const lottedOnhand = lottedByWarehouse[warehouse.warehouseId] || 0;
+          const nonLottedOnhand = totalOnhand - lottedOnhand;
+
+          if (nonLottedOnhand > 0) {
+            const result = {
+              locationName: warehouse.id,
+              warehouseId: warehouse.warehouseId,
+              Lines: [{
+                SKU: trackstarInventory.sku,
+                ProductName: trackstarInventory.name,
+                Quantity: nonLottedOnhand,
+                UnitCost: trackstarInventory.unit_cost || 1,
+                ProductLength: trackstarInventory.measurements?.length || 1,
+                ProductWidth: trackstarInventory.measurements?.width || 1,
+                ProductHeight: trackstarInventory.measurements?.height || 1,
+                ProductWeight: trackstarInventory.measurements?.weight || 1
+              }]
+            };
+
+            adjustments.push(result);
+          }
+        }
       }
     }
   } else {
@@ -206,6 +314,6 @@ function handler(params) {
     trackstarId: trackstarInventory.id,
     trackstarKey: trackstarInventory.sku,
     referenceKey: 'inventory:' + trackstarInventory.id,
-    adjustments
+    adjustments: adjustments
   };
 }

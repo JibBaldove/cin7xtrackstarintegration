@@ -264,11 +264,8 @@ export class ApiClient {
     if (!this.tenantId) {
       throw new Error('Tenant ID not set');
     }
-    if (!this.spaceId) {
-      throw new Error('Space ID not set');
-    }
 
-    const webhookUrl = `https://live.fastn.ai/api/v1/clients/${this.spaceId}/webhooks/sync_inventory_trackstarxcin7`;
+    const inventoryUrl = 'https://live.fastn.ai/api/v1/clients/d0f8c7f3-69d3-403c-90a0-17c8857e095f/webhooks/sync_inventory_trackstarxcin7';
     const headers: any = {
       'x-fastn-space-tenantid': this.tenantId,
       'x-fastn-space-connection-id': connectionId || 'default',
@@ -280,7 +277,7 @@ export class ApiClient {
       }
     };
 
-    const response = await axios.post(webhookUrl, payload, { headers });
+    const response = await axios.post(inventoryUrl, payload, { headers });
     return response.data;
   }
 

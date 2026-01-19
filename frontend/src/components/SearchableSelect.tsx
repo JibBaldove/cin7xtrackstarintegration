@@ -17,6 +17,7 @@ interface Props {
 
 export function SearchableSelect({ options, value, onChange, placeholder, disabled }: Props) {
   const [inputValue, setInputValue] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
 
   // Convert options to Polaris Autocomplete format
   const autocompleteOptions = useMemo(() => {
@@ -37,16 +38,32 @@ export function SearchableSelect({ options, value, onChange, placeholder, disabl
 
   // Get selected option
   const selectedOption = options.find(opt => opt.id === value);
-  const textFieldValue = selectedOption ? selectedOption.name : '';
+
+  // Show selected value when not searching, otherwise show search input
+  const displayValue = isSearching ? inputValue : (selectedOption?.name || '');
 
   const handleSelect = useCallback((selected: string[]) => {
     const selectedId = selected[0];
     onChange(selectedId);
     setInputValue('');
+    setIsSearching(false);
   }, [onChange]);
 
   const handleInputChange = useCallback((value: string) => {
     setInputValue(value);
+    setIsSearching(true);
+  }, []);
+
+  const handleFocus = useCallback(() => {
+    setIsSearching(true);
+  }, []);
+
+  const handleBlur = useCallback(() => {
+    // Delay to allow selection to complete
+    setTimeout(() => {
+      setIsSearching(false);
+      setInputValue('');
+    }, 200);
   }, []);
 
   return (
@@ -57,8 +74,10 @@ export function SearchableSelect({ options, value, onChange, placeholder, disabl
       textField={
         <Autocomplete.TextField
           onChange={handleInputChange}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
           label=""
-          value={inputValue}
+          value={displayValue}
           placeholder={placeholder || 'Select...'}
           autoComplete="off"
           disabled={disabled}
@@ -70,7 +89,7 @@ export function SearchableSelect({ options, value, onChange, placeholder, disabl
           <p>No results found</p>
         </div>
       }
-      listTitle={textFieldValue ? `Selected: ${textFieldValue}` : 'Options'}
+      listTitle="Options"
     />
   );
 }

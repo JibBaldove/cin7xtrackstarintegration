@@ -18,7 +18,7 @@ export interface SyncConfig {
   webhook?: Webhook[];
   schedule?: Schedule;
   // Inventory-specific fields
-  quantityType?: 'onhand' | 'available';
+  quantityType?: 'onhand' | 'sellable' | 'fulfillable';
   locationScope?: 'mapped' | 'all';
   autoAcceptThreshold?: number;
   // Sale-specific fields

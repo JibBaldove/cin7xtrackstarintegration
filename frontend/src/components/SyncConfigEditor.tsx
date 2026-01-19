@@ -90,7 +90,8 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
 
   const quantityTypeOptions = [
     { label: 'On Hand', value: 'onhand' },
-    { label: 'Available', value: 'available' },
+    { label: 'Sellable', value: 'sellable' },
+    { label: 'Fulfillable', value: 'fulfillable' },
   ];
 
   const locationScopeOptions = [
@@ -177,7 +178,7 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
 
                   <BlockStack gap="100">
                     <Text as="p" variant="bodySm" tone="subdued">
-                      <strong>Quantity Type:</strong> Choose between on-hand (physical inventory) or available (after commitments)
+                      <strong>Quantity Type:</strong> On Hand (physical inventory), Sellable (on hand - unsellable), or Fulfillable (on hand - committed - unfulfillable)
                     </Text>
                     <Text as="p" variant="bodySm" tone="subdued">
                       <strong>Location Scope:</strong> Sync only mapped warehouses or all locations
