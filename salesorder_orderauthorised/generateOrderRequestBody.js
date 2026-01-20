@@ -8,7 +8,7 @@ function handler(params) {
   const tenantConfig = params.data?.var.tenantConfig || {};
   const connectionId = params.data.var.connectionId;
   let warehouseId = params.data?.var.mappedWarehouse;
-  const defaultShippingMethod = params.data?.var.defaultShippingMethod || "N/A";
+  const defaultShippingMethod = params.data?.var.default3PLShippingMethod || "N/A";
 
   // Find substitutionList for current connection
   const locationMapping = tenantConfig.locationMapping || [];

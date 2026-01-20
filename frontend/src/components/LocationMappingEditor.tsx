@@ -225,6 +225,15 @@ export function LocationMappingEditor({
                 </div>
               )}
 
+              <TextField
+                label="Default 3PL Shipping Method"
+                value={location.default3PLShippingMethod || ''}
+                onChange={(value) => updateLocationMapping(locationIndex, 'default3PLShippingMethod', value)}
+                placeholder="e.g., Standard Shipping"
+                helpText="Specify the default 3PL shipping method for this connection"
+                autoComplete="off"
+              />
+
               <BlockStack gap="400">
                 <Divider />
                 <InlineStack align="space-between" blockAlign="center">
