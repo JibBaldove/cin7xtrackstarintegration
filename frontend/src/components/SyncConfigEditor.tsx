@@ -108,7 +108,7 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
   return (
     <BlockStack gap="400">
       <InlineStack align="space-between" blockAlign="center">
-        <Text as="h2" variant="headingLg">Sync Configuration</Text>
+        <Text as="h2" variant="headingLg">Entity Settings</Text>
         <Button onClick={addSyncConfig}>Add Entity</Button>
       </InlineStack>
 
@@ -290,7 +290,7 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
           border: '1px dashed var(--p-color-border)'
         }}>
           <Text as="p" variant="bodySm" tone="subdued">
-            No sync configurations yet. Click "Add Entity" to create one.
+            No entity settings yet. Click "Add Entity" to create one.
           </Text>
         </div>
       )}

@@ -287,6 +287,39 @@ export class ApiClient {
     });
     return response.data.tenants || [];
   }
+
+  async triggerEntitySync(entity: string, connectionId: string) {
+    if (!this.tenantId) {
+      throw new Error('Tenant ID not set');
+    }
+    const headers: any = {
+      'x-fastn-space-connection-id': connectionId
+    };
+
+    // Map entity to appropriate endpoint
+    const endpointMap: Record<string, string> = {
+      'sale': '/trigger_cin7_trackstar_sale_sync',
+      'purchase': '/trigger_cin7_trackstar_purchase_sync',
+      'inventory': '/trigger_cin7_trackstar_inventory_sync',
+      'transfer': '/trigger_cin7_trackstar_transfer_sync',
+      'product': '/trigger_cin7_trackstar_product_sync'
+    };
+
+    const endpoint = endpointMap[entity];
+    if (!endpoint) {
+      throw new Error(`Unknown entity type: ${entity}`);
+    }
+
+    const payload = {
+      input: {
+        entity: entity,
+        connectionId: connectionId
+      }
+    };
+
+    const response = await this.client.post(endpoint, payload, { headers });
+    return response.data;
+  }
 }
 
 export const apiClient = new ApiClient();

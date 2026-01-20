@@ -115,17 +115,17 @@ export function DashboardPage() {
   const tabs = [
     {
       id: 'sync',
-      content: 'Sync Configuration',
+      content: 'Entity Settings',
       panelID: 'sync-panel',
     },
     {
       id: 'location',
-      content: 'Location Mapping',
+      content: 'Connection Settings',
       panelID: 'location-panel',
     },
     {
       id: 'settings',
-      content: 'Settings',
+      content: 'Other Settings',
       panelID: 'settings-panel',
     },
   ];
@@ -143,7 +143,7 @@ export function DashboardPage() {
   return (
     <Page
       title="Configuration"
-      subtitle="Manage your sync configuration, location mappings, and settings"
+      subtitle="Manage your entity settings, connection settings, and other settings"
       primaryAction={{
         content: 'Save Changes',
         onAction: handleSave,
@@ -193,6 +193,7 @@ export function DashboardPage() {
                 onChange={(newLocationMapping) => setConfig({ ...config, locationMapping: newLocationMapping })}
                 cin7Warehouses={options.cin7Warehouses}
                 connections={options.connections}
+                syncConfig={config.syncConfig}
               />
             )}
 

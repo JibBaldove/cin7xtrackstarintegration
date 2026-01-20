@@ -9,6 +9,17 @@ export interface Webhook {
 export interface Schedule {
   status: 'Active' | 'Inactive';
   interval: string; // in hours
+  prepareScheduleId?: string;
+  processScheduleId?: string;
+}
+
+// Entity schedules for connection-based scheduling
+export interface EntitySchedules {
+  sale?: Schedule;
+  purchase?: Schedule;
+  inventory?: Schedule;
+  transfer?: Schedule;
+  product?: Schedule;
 }
 
 // Sync configuration for different entities
@@ -49,6 +60,7 @@ export interface LocationMapping {
   connectionId: string;
   substitutionList?: SubstitutionList[];
   default3PLShippingMethod?: string;
+  entitySchedules?: EntitySchedules;
 }
 
 // Options for dropdowns
