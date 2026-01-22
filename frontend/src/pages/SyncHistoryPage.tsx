@@ -403,17 +403,6 @@ export function SyncHistoryPage() {
     return new Date(dateStr).toLocaleString();
   };
 
-  const getStatusColor = (status: SyncStatus | string) => {
-    switch (status) {
-      case 'Success': return '#28a745';
-      case 'Failed': return '#dc3545';
-      case 'Skipped': return '#ffc107';
-      case 'Invalid': return '#6c757d';
-      case 'In Queue': return '#007bff';
-      default: return '#6c757d';
-    }
-  };
-
   const getStatusBadgeTone = (status: SyncStatus | string): 'success' | 'critical' | 'warning' | 'info' | undefined => {
     switch (status) {
       case 'Success': return 'success';
@@ -584,10 +573,9 @@ export function SyncHistoryPage() {
             <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #ddd' }}>
               <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', width: '30px' }}></th>
               <SortableHeader field="cin7_key">Cin7 Key</SortableHeader>
-              <SortableHeader field="trackstar_key">Trackstar Key</SortableHeader>
+              <SortableHeader field="trackstar_key">3PL Key</SortableHeader>
               <SortableHeader field="connection_id">Connection</SortableHeader>
               <SortableHeader field="last_sync_status">Status</SortableHeader>
-              <SortableHeader field="last_sync_action">Action</SortableHeader>
               <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600' }}>Message</th>
               <SortableHeader field="last_pushed_date">
                 {actionFilter === 'PULL' ? 'Last Pulled' : 'Last Pushed'}
@@ -598,7 +586,7 @@ export function SyncHistoryPage() {
           <tbody>
             {filteredRecords.length === 0 ? (
               <tr>
-                <td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                <td colSpan={8} style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
                   {loading ? 'Loading records...' : 'No records found'}
                 </td>
               </tr>
@@ -666,7 +654,7 @@ export function SyncHistoryPage() {
                             <div>{record.trackstar_key || '-'}</div>
                             <div
                               style={{ fontSize: '0.75rem', color: '#999', fontFamily: 'monospace', cursor: 'help' }}
-                              title={record.type === 'inventory' ? record.trackstar_key : record.trackstar_id}
+                              title={(record.type === 'inventory' ? record.trackstar_key : record.trackstar_id) || undefined}
                             >
                               {record.type === 'inventory' ? record.trackstar_key : truncateId(record.trackstar_id)}
                             </div>
@@ -706,7 +694,6 @@ export function SyncHistoryPage() {
                         {record.displayStatus}
                       </Badge>
                     </td>
-                    <td style={{ padding: '0.75rem' }}>{record.last_sync_action}</td>
                     <td style={{ padding: '0.75rem', maxWidth: '300px' }}>
                       <div
                         style={{
@@ -785,7 +772,7 @@ export function SyncHistoryPage() {
                               <div>{child.trackstar_key || '-'}</div>
                               <div
                                 style={{ fontSize: '0.75rem', color: '#999', fontFamily: 'monospace', cursor: 'help' }}
-                                title={child.type === 'inventory' ? child.trackstar_key : child.trackstar_id}
+                                title={(child.type === 'inventory' ? child.trackstar_key : child.trackstar_id) || undefined}
                               >
                                 {child.type === 'inventory' ? child.trackstar_key : truncateId(child.trackstar_id)}
                               </div>
@@ -825,7 +812,6 @@ export function SyncHistoryPage() {
                           {child.last_sync_status}
                         </Badge>
                       </td>
-                      <td style={{ padding: '0.75rem' }}>{child.last_sync_action}</td>
                       <td style={{ padding: '0.75rem', maxWidth: '300px' }}>
                         <div
                           style={{
