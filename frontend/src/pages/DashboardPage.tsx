@@ -83,7 +83,8 @@ export function DashboardPage() {
           return {
             id: conn.id,
             name: name,
-            locations: conn.locations || []
+            locations: conn.locations || [],
+            shippingMethods: conn.shippingMethods || []
           };
         });
 

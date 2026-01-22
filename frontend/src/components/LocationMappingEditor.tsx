@@ -1,5 +1,5 @@
-import { useCallback } from 'react';
-import { Card, TextField, Button, Banner, BlockStack, InlineStack, Text, Divider } from '@shopify/polaris';
+import React, { useCallback } from 'react';
+import { Card, TextField, Button, Banner, BlockStack, InlineStack, Text, Divider, Select } from '@shopify/polaris';
 import type { LocationMapping, SubstitutionList, Cin7Warehouse, Connection } from '../types/config';
 import { SearchableSelect } from './SearchableSelect';
 
@@ -225,15 +225,6 @@ export function LocationMappingEditor({
                 </div>
               )}
 
-              <TextField
-                label="Default 3PL Shipping Method"
-                value={location.default3PLShippingMethod || ''}
-                onChange={(value) => updateLocationMapping(locationIndex, 'default3PLShippingMethod', value)}
-                placeholder="e.g., Standard Shipping"
-                helpText="Specify the default 3PL shipping method for this connection"
-                autoComplete="off"
-              />
-
               <BlockStack gap="400">
                 <Divider />
                 <InlineStack align="space-between" blockAlign="center">
@@ -339,6 +330,25 @@ export function LocationMappingEditor({
                 )}
               </BlockStack>
 
+              {selectedConnection && selectedConnection.shippingMethods && selectedConnection.shippingMethods.length > 0 && (
+                <>
+                  <Divider />
+                  <Select
+                    label="Default 3PL Shipping Method"
+                    options={[
+                      { label: 'None', value: '' },
+                      ...selectedConnection.shippingMethods.map(method => ({
+                        label: `${method.name} - ${method.carrier_name} (ID: ${method.id})`,
+                        value: method.id
+                      }))
+                    ]}
+                    value={location.default3PLShippingMethod || ''}
+                    onChange={(value) => updateLocationMapping(locationIndex, 'default3PLShippingMethod', value)}
+                    helpText="Select the default 3PL shipping method for this connection"
+                  />
+                </>
+              )}
+
               <BlockStack gap="400">
                 <Divider />
                 <InlineStack align="space-between" blockAlign="center">
@@ -384,7 +394,7 @@ export function LocationMappingEditor({
                               <TextField
                                 label="Cin7 value"
                                 value={key}
-                                onBlur={(e: any) => {
+                                onBlur={(e: React.FocusEvent<HTMLInputElement>) => {
                                   const newKey = e.target.value.trim();
                                   if (newKey && newKey !== key) {
                                     renameSubstitutionKey(locationIndex, subIndex, key, newKey);

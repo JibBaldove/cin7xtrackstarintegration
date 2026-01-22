@@ -79,10 +79,18 @@ export interface TrackstarLocation {
   name: string;
 }
 
+export interface ShippingMethod {
+  id: string;
+  name: string;
+  carrier_id: string;
+  carrier_name: string;
+}
+
 export interface Connection {
   id: string;
   name: string;
   locations: TrackstarLocation[];
+  shippingMethods?: ShippingMethod[];
 }
 
 export interface ConfigOptions {

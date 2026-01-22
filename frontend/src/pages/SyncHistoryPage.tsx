@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Page, Banner } from '@shopify/polaris';
+import { Page, Banner, Card, Tabs, Select, TextField, Button, BlockStack, InlineStack, Badge, Text } from '@shopify/polaris';
 import { useAuth } from '../contexts/AuthContext';
 import { apiClient } from '../api/client';
 import type { SyncHistoryRecord, EntityType, SyncStatus } from '../types/syncHistory';
@@ -414,6 +414,16 @@ export function SyncHistoryPage() {
     }
   };
 
+  const getStatusBadgeTone = (status: SyncStatus | string): 'success' | 'critical' | 'warning' | 'info' | undefined => {
+    switch (status) {
+      case 'Success': return 'success';
+      case 'Failed': return 'critical';
+      case 'Skipped': return 'warning';
+      case 'In Queue': return 'info';
+      default: return undefined;
+    }
+  };
+
   const copyToClipboard = async (text: string, recordId: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -435,154 +445,103 @@ export function SyncHistoryPage() {
     return message.slice(0, 500) + '...';
   };
 
+  // Prepare action filter tabs
+  const actionTabs = useMemo(() => {
+    const tabs = [];
+
+    // Only show PUSH tab if not inventory entity
+    if (selectedEntity !== 'inventory') {
+      tabs.push({
+        id: 'push-tab',
+        content: 'Cin7 → Trackstar',
+        panelID: 'push-panel'
+      });
+    }
+
+    tabs.push({
+      id: 'pull-tab',
+      content: 'Trackstar → Cin7',
+      panelID: 'pull-panel'
+    });
+
+    return tabs;
+  }, [selectedEntity]);
+
+  const selectedActionTabIndex = useMemo(() => {
+    if (selectedEntity === 'inventory') {
+      return 0; // PULL is the only/first tab
+    }
+    return actionFilter === 'PUSH' ? 0 : 1;
+  }, [actionFilter, selectedEntity]);
+
+  const handleActionTabChange = (selectedTabIndex: number) => {
+    if (selectedEntity === 'inventory') {
+      setActionFilter('PULL');
+    } else {
+      setActionFilter(selectedTabIndex === 0 ? 'PUSH' : 'PULL');
+    }
+  };
+
   return (
     <Page
       title="Sync History"
       subtitle={`View and manage synchronization records for ${tenantId}`}
     >
-      <div style={{ maxWidth: '100%', overflow: 'auto' }}>
+      <BlockStack gap="400">
+        {/* Action Filter Tabs (PUSH/PULL) */}
+        <Tabs tabs={actionTabs} selected={selectedActionTabIndex} onSelect={handleActionTabChange}>
+          <div style={{ paddingTop: '1rem' }} />
+        </Tabs>
 
-      {/* Action Filter Tabs (PUSH/PULL/ALL) */}
-      <div style={{
-        display: 'flex',
-        gap: '0.5rem',
-        marginBottom: '1.5rem',
-        borderBottom: '3px solid #e0e0e0',
-        paddingBottom: '0'
-      }}>
-        {(['PUSH', 'PULL'] as const).filter(action => {
-          // Hide PUSH (Cin7 → Trackstar) tab when inventory is selected
-          if (selectedEntity === 'inventory' && action === 'PUSH') {
-            return false;
-          }
-          return true;
-        }).map(action => {
-          return (
-            <button
-              key={action}
-              onClick={() => setActionFilter(action)}
-              style={{
-                padding: '1rem 2rem',
-                backgroundColor: actionFilter === action ? '#007bff' : 'transparent',
-                color: actionFilter === action ? 'white' : '#666',
-                border: 'none',
-                borderTopLeftRadius: '8px',
-                borderTopRightRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: actionFilter === action ? '600' : '500',
-                fontSize: '1rem',
-                transition: 'all 0.2s',
-                borderBottom: actionFilter === action ? 'none' : '3px solid transparent',
-                position: 'relative',
-                bottom: '-3px'
-              }}
-            >
-              {action === 'PUSH' ? 'Cin7 → Trackstar' : 'Trackstar → Cin7'}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Filters */}
-      <div style={{
-        backgroundColor: 'white',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        padding: '1.5rem',
-        marginBottom: '1.5rem'
-      }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr auto', gap: '1rem', alignItems: 'end' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
-              Entity Type
-            </label>
-            <select
-              value={selectedEntity}
-              onChange={(e) => setSelectedEntity(e.target.value as EntityType | '')}
-              disabled={activeEntities.length === 0}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '0.875rem',
-                cursor: activeEntities.length === 0 ? 'not-allowed' : 'pointer',
-                opacity: activeEntities.length === 0 ? 0.6 : 1
-              }}
-            >
-              <option value="">All Active Entities</option>
-              {activeEntities.map(entity => (
-                <option key={entity} value={entity}>
-                  {entity.charAt(0).toUpperCase() + entity.slice(1)}
-                </option>
-              ))}
-            </select>
-            {activeEntities.length === 0 && tenantConfig && (
-              <div style={{ fontSize: '0.75rem', color: '#dc3545', marginTop: '0.25rem' }}>
-                No active entities in config
+        {/* Filters */}
+        <Card>
+          <BlockStack gap="400">
+            <InlineStack gap="400" blockAlign="end" wrap={false}>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <Select
+                  label="Entity Type"
+                  options={[
+                    { label: 'All Active Entities', value: '' },
+                    ...activeEntities.map(entity => ({
+                      label: entity.charAt(0).toUpperCase() + entity.slice(1),
+                      value: entity
+                    }))
+                  ]}
+                  value={selectedEntity}
+                  onChange={(value) => setSelectedEntity(value as EntityType | '')}
+                  disabled={activeEntities.length === 0}
+                  helpText={activeEntities.length === 0 && tenantConfig ? 'No active entities in config' : undefined}
+                />
               </div>
-            )}
-          </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
-              Minimum Date
-            </label>
-            <input
-              type="date"
-              value={minDate}
-              onChange={(e) => setMinDate(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '0.875rem'
-              }}
-            />
-          </div>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <TextField
+                  label="Minimum Date"
+                  type="date"
+                  value={minDate}
+                  onChange={(value) => setMinDate(value)}
+                  autoComplete="off"
+                />
+              </div>
 
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500', fontSize: '0.875rem' }}>
-              Search
-            </label>
-            <input
-              type="text"
-              placeholder="Search records..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '0.5rem',
-                border: '1px solid #ddd',
-                borderRadius: '4px',
-                fontSize: '0.875rem'
-              }}
-            />
-          </div>
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <TextField
+                  label="Search"
+                  value={searchTerm}
+                  onChange={(value) => setSearchTerm(value)}
+                  placeholder="Search records..."
+                  autoComplete="off"
+                />
+              </div>
 
-          <button
-            onClick={loadSyncHistory}
-            disabled={loading}
-            style={{
-              padding: '0.5rem 1.5rem',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: loading ? 'not-allowed' : 'pointer',
-              fontWeight: '500',
-              fontSize: '0.875rem',
-              opacity: loading ? 0.6 : 1
-            }}
-          >
-            {loading ? 'Loading...' : 'Load Records'}
-          </button>
-        </div>
-      </div>
+              <Button onClick={loadSyncHistory} loading={loading}>
+                Load Records
+              </Button>
+            </InlineStack>
+          </BlockStack>
+        </Card>
 
-      {error && (
-        <div style={{ marginBottom: '1rem' }}>
+        {error && (
           <Banner
             title="Error"
             tone="critical"
@@ -590,11 +549,9 @@ export function SyncHistoryPage() {
           >
             {error}
           </Banner>
-        </div>
-      )}
+        )}
 
-      {successMessage && (
-        <div style={{ marginBottom: '1rem' }}>
+        {successMessage && (
           <Banner
             title="Success"
             tone="success"
@@ -602,45 +559,26 @@ export function SyncHistoryPage() {
           >
             {successMessage}
           </Banner>
-        </div>
-      )}
+        )}
 
-      {/* Status Tabs */}
-      <div style={{
-        display: 'flex',
-        gap: '0.5rem',
-        marginBottom: '1rem',
-        borderBottom: '2px solid #ddd',
-        flexWrap: 'wrap'
-      }}>
-        {['Ready to Process', 'All', ...statuses].map(status => (
-          <button
-            key={status}
-            onClick={() => setActiveTab(status as SyncStatus | 'All' | 'Ready to Process')}
-            style={{
-              padding: '0.75rem 1.5rem',
-              backgroundColor: activeTab === status ? 'white' : 'transparent',
-              color: activeTab === status ? '#007bff' : '#666',
-              border: 'none',
-              borderBottom: activeTab === status ? '3px solid #007bff' : '3px solid transparent',
-              cursor: 'pointer',
-              fontWeight: activeTab === status ? '600' : '400',
-              fontSize: '0.875rem',
-              transition: 'all 0.2s'
-            }}
-          >
-            {status} ({statusCounts[status] || 0})
-          </button>
-        ))}
-      </div>
+        {/* Status Tabs */}
+        <Tabs
+          tabs={['Ready to Process', 'All', ...statuses].map(status => ({
+            id: status,
+            content: `${status} (${statusCounts[status] || 0})`,
+            panelID: `${status}-panel`
+          }))}
+          selected={['Ready to Process', 'All', ...statuses].indexOf(activeTab)}
+          onSelect={(selectedTabIndex) => {
+            const statusOptions: (SyncStatus | 'All' | 'Ready to Process')[] = ['Ready to Process', 'All', ...statuses];
+            setActiveTab(statusOptions[selectedTabIndex]);
+          }}
+        >
+          <div style={{ paddingTop: '1rem' }} />
+        </Tabs>
 
-      {/* Records Table */}
-      <div style={{
-        backgroundColor: 'white',
-        border: '1px solid #ddd',
-        borderRadius: '8px',
-        overflow: 'auto'
-      }}>
+        {/* Records Table */}
+        <Card>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
           <thead>
             <tr style={{ backgroundColor: '#f8f9fa', borderBottom: '2px solid #ddd' }}>
@@ -764,16 +702,9 @@ export function SyncHistoryPage() {
                     </td>
                     <td style={{ padding: '0.75rem' }}>{record.connection_id || '-'}</td>
                     <td style={{ padding: '0.75rem' }}>
-                      <span style={{
-                        padding: '0.25rem 0.75rem',
-                        borderRadius: '12px',
-                        backgroundColor: getStatusColor(record.displayStatus) + '20',
-                        color: getStatusColor(record.displayStatus),
-                        fontWeight: '500',
-                        fontSize: '0.75rem'
-                      }}>
+                      <Badge tone={getStatusBadgeTone(record.displayStatus)}>
                         {record.displayStatus}
-                      </span>
+                      </Badge>
                     </td>
                     <td style={{ padding: '0.75rem' }}>{record.last_sync_action}</td>
                     <td style={{ padding: '0.75rem', maxWidth: '300px' }}>
@@ -796,23 +727,14 @@ export function SyncHistoryPage() {
                       {formatDate(record.last_pushed_date)}
                     </td>
                     <td style={{ padding: '0.75rem' }}>
-                      <button
+                      <Button
+                        size="slim"
                         onClick={() => handleResync(record)}
                         disabled={resyncingRecords.has(record.record_id)}
-                        style={{
-                          padding: '0.375rem 0.75rem',
-                          backgroundColor: resyncingRecords.has(record.record_id) ? '#6c757d' : '#007bff',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: resyncingRecords.has(record.record_id) ? 'not-allowed' : 'pointer',
-                          fontSize: '0.75rem',
-                          fontWeight: '500',
-                          opacity: resyncingRecords.has(record.record_id) ? 0.6 : 1
-                        }}
+                        loading={resyncingRecords.has(record.record_id)}
                       >
-                        {resyncingRecords.has(record.record_id) ? 'Syncing...' : 'Sync'}
-                      </button>
+                        Sync
+                      </Button>
                     </td>
                   </tr>
 
@@ -899,16 +821,9 @@ export function SyncHistoryPage() {
                       </td>
                       <td style={{ padding: '0.75rem' }}>{child.connection_id || '-'}</td>
                       <td style={{ padding: '0.75rem' }}>
-                        <span style={{
-                          padding: '0.25rem 0.75rem',
-                          borderRadius: '12px',
-                          backgroundColor: getStatusColor(child.last_sync_status) + '20',
-                          color: getStatusColor(child.last_sync_status),
-                          fontWeight: '500',
-                          fontSize: '0.75rem'
-                        }}>
+                        <Badge tone={getStatusBadgeTone(child.last_sync_status)}>
                           {child.last_sync_status}
-                        </span>
+                        </Badge>
                       </td>
                       <td style={{ padding: '0.75rem' }}>{child.last_sync_action}</td>
                       <td style={{ padding: '0.75rem', maxWidth: '300px' }}>
@@ -931,23 +846,14 @@ export function SyncHistoryPage() {
                         {formatDate(child.last_pushed_date)}
                       </td>
                       <td style={{ padding: '0.75rem' }}>
-                        <button
+                        <Button
+                          size="slim"
                           onClick={() => handleResync(child)}
                           disabled={resyncingRecords.has(child.record_id)}
-                          style={{
-                            padding: '0.375rem 0.75rem',
-                            backgroundColor: resyncingRecords.has(child.record_id) ? '#6c757d' : '#007bff',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: resyncingRecords.has(child.record_id) ? 'not-allowed' : 'pointer',
-                            fontSize: '0.75rem',
-                            fontWeight: '500',
-                            opacity: resyncingRecords.has(child.record_id) ? 0.6 : 1
-                          }}
+                          loading={resyncingRecords.has(child.record_id)}
                         >
-                          {resyncingRecords.has(child.record_id) ? 'Syncing...' : 'Sync'}
-                        </button>
+                          Sync
+                        </Button>
                       </td>
                     </tr>
                   ))}
@@ -956,12 +862,12 @@ export function SyncHistoryPage() {
             )}
           </tbody>
         </table>
-      </div>
+        </Card>
 
-      <div style={{ marginTop: '1rem', color: '#666', fontSize: '0.875rem' }}>
-        Showing {filteredRecords.length} of {organizedRecords.length} records
-      </div>
-      </div>
+        <Text as="p" variant="bodySm" tone="subdued">
+          Showing {filteredRecords.length} of {organizedRecords.length} records
+        </Text>
+      </BlockStack>
     </Page>
   );
 }
