@@ -14,6 +14,7 @@ function handler(params) {
           const locationMapping = tenantConfig.locationMapping || [];
           const currentConnection = locationMapping.find(mapping => mapping.connectionId === connectionId);
           const substitutionList = currentConnection?.substitutionList || [];
+          const defaultShippingMethod = currentConnection?.default3PLShippingMethod;
 
           // Helper function to apply substitutions from the substitutionList
           const applySubstitution = (value, listName) => {
@@ -188,9 +189,11 @@ function handler(params) {
           const billingParsed = parseDisplayAddressLine2(data?.BillingAddress?.DisplayAddressLine2);
 
           // Determine which shipping/carrier method fields to include based on schema
-          const carrierValue = data?.Carrier;
-          const carrierIdValue = data?.CarrierID;
-          const hasCarrierValue = carrierValue && carrierValue !== "N/A";
+          // Use default shipping method from config if available, otherwise fall back to Cin7 data
+          const carrierValue = defaultShippingMethod?.carrier_name || data?.Carrier;
+          const carrierIdValue = defaultShippingMethod?.carrier_id || data?.CarrierID;
+          const shippingMethodNameValue = defaultShippingMethod?.name || data?.Carrier;
+          const shippingMethodIdValue = defaultShippingMethod?.id || data?.CarrierID;
 
           // Check what fields exist in schema
           const hasCarrierName = isFieldInSchema('carrier_name');
@@ -202,28 +205,26 @@ function handler(params) {
 
           let shippingMethodFields = {};
 
-          // Handle carrier_name vs carrier vs carrier_id
+          // Handle carrier fields - add each field that exists in schema
           if (hasCarrierName) {
             shippingMethodFields.carrier_name = carrierValue || "N/A";
-          } else if (hasCarrier) {
+          }
+          if (hasCarrier) {
             shippingMethodFields.carrier = carrierValue || "N/A";
-            if (!hasCarrierValue && hasCarrierId) {
-              shippingMethodFields.carrier_id = carrierIdValue || "N/A";
-            }
-          } else if (hasCarrierId) {
+          }
+          if (hasCarrierId) {
             shippingMethodFields.carrier_id = carrierIdValue || "N/A";
           }
 
-          // Handle shipping_method_name vs shipping_method vs shipping_method_id
+          // Handle shipping_method fields - add each field that exists in schema
           if (hasShippingMethodName) {
-            shippingMethodFields.shipping_method_name = carrierValue || "N/A";
-          } else if (hasShippingMethod) {
-            shippingMethodFields.shipping_method = carrierValue || "N/A";
-            if (!hasCarrierValue && hasShippingMethodId) {
-              shippingMethodFields.shipping_method_id = carrierIdValue || "N/A";
-            }
-          } else if (hasShippingMethodId) {
-            shippingMethodFields.shipping_method_id = carrierIdValue || "N/A";
+            shippingMethodFields.shipping_method_name = shippingMethodNameValue || "N/A";
+          }
+          if (hasShippingMethod) {
+            shippingMethodFields.shipping_method = shippingMethodNameValue || "N/A";
+          }
+          if (hasShippingMethodId) {
+            shippingMethodFields.shipping_method_id = shippingMethodIdValue || "N/A";
           }
 
           // Get current fulfillment from loop
