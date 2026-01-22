@@ -65,7 +65,12 @@ export interface LocationMapping {
   warehouses: WarehouseMapping[];
   connectionId: string;
   substitutionList?: SubstitutionList[];
-  default3PLShippingMethod?: string;
+  default3PLShippingMethod?: {
+    id: string;
+    name: string;
+    carrier_id: string;
+    carrier_name: string;
+  };
 }
 
 // Options for dropdowns

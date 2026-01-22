@@ -345,8 +345,22 @@ export function LocationMappingEditor({
                           name: `${method.name} - ${method.carrier_name} (ID: ${method.id})`
                         }))
                       ]}
-                      value={location.default3PLShippingMethod || ''}
-                      onChange={(value) => updateLocationMapping(locationIndex, 'default3PLShippingMethod', value)}
+                      value={location.default3PLShippingMethod?.id || ''}
+                      onChange={(value) => {
+                        if (!value) {
+                          updateLocationMapping(locationIndex, 'default3PLShippingMethod', undefined);
+                        } else {
+                          const selectedMethod = selectedConnection.shippingMethods?.find(m => m.id === value);
+                          if (selectedMethod) {
+                            updateLocationMapping(locationIndex, 'default3PLShippingMethod', {
+                              id: selectedMethod.id,
+                              name: selectedMethod.name,
+                              carrier_id: selectedMethod.carrier_id,
+                              carrier_name: selectedMethod.carrier_name
+                            });
+                          }
+                        }
+                      }}
                       placeholder="Search by method or carrier name..."
                     />
                     <Text as="p" variant="bodySm" tone="subdued">

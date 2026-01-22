@@ -53,6 +53,40 @@ export function DashboardPage() {
     };
   }, []);
 
+  const migrateShippingMethodToObject = useCallback((config: TenantConfig, connections: Connection[]): TenantConfig => {
+    if (!config.locationMapping) {
+      return config;
+    }
+
+    const migratedLocationMapping = config.locationMapping.map(location => {
+      // If default3PLShippingMethod is a string, convert it to object
+      if (typeof location.default3PLShippingMethod === 'string' && location.default3PLShippingMethod) {
+        const connection = connections.find(c => c.id === location.connectionId);
+        const shippingMethod = connection?.shippingMethods?.find(
+          m => m.id === location.default3PLShippingMethod
+        );
+
+        if (shippingMethod) {
+          return {
+            ...location,
+            default3PLShippingMethod: {
+              id: shippingMethod.id,
+              name: shippingMethod.name,
+              carrier_id: shippingMethod.carrier_id,
+              carrier_name: shippingMethod.carrier_name
+            }
+          };
+        }
+      }
+      return location;
+    });
+
+    return {
+      ...config,
+      locationMapping: migratedLocationMapping
+    };
+  }, []);
+
   const loadConfig = async () => {
     try {
       setLoading(true);
@@ -61,8 +95,6 @@ export function DashboardPage() {
       let configData = response.config || response;
 
       configData = migrateSchedulesToTopLevel(configData);
-
-      setConfig(configData);
 
       if (response.options) {
         const cin7Warehouses = (response.options.cin7Warehouses || []).map((wh: any) => ({
@@ -95,10 +127,16 @@ export function DashboardPage() {
           connections = nonDefaultConnections;
         }
 
+        // Migrate shipping method after connections are loaded
+        configData = migrateShippingMethodToObject(configData, connections);
+
+        setConfig(configData);
         setOptions({
           cin7Warehouses,
           connections
         });
+      } else {
+        setConfig(configData);
       }
     } catch (err) {
       setError('Failed to load configuration');
