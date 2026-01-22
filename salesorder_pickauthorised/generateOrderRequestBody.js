@@ -206,25 +206,27 @@ function handler(params) {
           let shippingMethodFields = {};
 
           // Handle carrier fields - add each field that exists in schema
+          // carrier is deprecated if carrier_name or carrier_id exists
           if (hasCarrierName) {
             shippingMethodFields.carrier_name = carrierValue || "N/A";
           }
-          if (hasCarrier) {
-            shippingMethodFields.carrier = carrierValue || "N/A";
+          if (hasCarrierId && carrierIdValue) {
+            shippingMethodFields.carrier_id = carrierIdValue;
           }
-          if (hasCarrierId) {
-            shippingMethodFields.carrier_id = carrierIdValue || "N/A";
+          if (hasCarrier && !hasCarrierName && !hasCarrierId) {
+            shippingMethodFields.carrier = carrierValue || "N/A";
           }
 
           // Handle shipping_method fields - add each field that exists in schema
+          // shipping_method is deprecated if shipping_method_name or shipping_method_id exists
           if (hasShippingMethodName) {
             shippingMethodFields.shipping_method_name = shippingMethodNameValue || "N/A";
           }
-          if (hasShippingMethod) {
-            shippingMethodFields.shipping_method = shippingMethodNameValue || "N/A";
+          if (hasShippingMethodId && shippingMethodIdValue) {
+            shippingMethodFields.shipping_method_id = shippingMethodIdValue;
           }
-          if (hasShippingMethodId) {
-            shippingMethodFields.shipping_method_id = shippingMethodIdValue || "N/A";
+          if (hasShippingMethod && !hasShippingMethodName && !hasShippingMethodId) {
+            shippingMethodFields.shipping_method = shippingMethodNameValue || "N/A";
           }
 
           // Get current fulfillment from loop
