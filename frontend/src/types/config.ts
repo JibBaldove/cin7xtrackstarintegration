@@ -20,6 +20,12 @@ export interface EntitySchedules {
   inventory?: Schedule;
   transfer?: Schedule;
   product?: Schedule;
+  notification?: Schedule;
+}
+
+// Connection schedules (top-level)
+export interface ConnectionSchedules {
+  [connectionId: string]: EntitySchedules;
 }
 
 // Sync configuration for different entities
@@ -60,7 +66,6 @@ export interface LocationMapping {
   connectionId: string;
   substitutionList?: SubstitutionList[];
   default3PLShippingMethod?: string;
-  entitySchedules?: EntitySchedules;
 }
 
 // Options for dropdowns
@@ -93,6 +98,7 @@ export interface TenantConfig {
   syncConfig: SyncConfig[];
   locationMapping: LocationMapping[];
   notificationRecipient: string[];
+  connectionSchedules?: ConnectionSchedules;
 }
 
 // Config update payload (excludes API key)
@@ -100,6 +106,7 @@ export interface TenantConfigUpdate {
   syncConfig: SyncConfig[];
   locationMapping: LocationMapping[];
   notificationRecipient: string[];
+  connectionSchedules?: ConnectionSchedules;
 }
 
 // API key update payload

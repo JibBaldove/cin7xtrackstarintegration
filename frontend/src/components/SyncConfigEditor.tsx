@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import { Card, Select, TextField, Button, Banner, BlockStack, InlineStack, Text, Divider } from '@shopify/polaris';
+import { Card, Select, TextField, Button, Banner, BlockStack, InlineStack, Text, Divider, Checkbox } from '@shopify/polaris';
 import type { SyncConfig, Webhook } from '../types/config';
 
 interface Props {
@@ -140,6 +140,21 @@ export function SyncConfigEditor({ syncConfig, onChange }: Props) {
                 />
               </div>
             </InlineStack>
+
+            {/* Sale-specific fields */}
+            {sync.entity === 'sale' && (
+              <Card background="bg-surface-info-hover">
+                <BlockStack gap="400">
+                  <Text as="h4" variant="headingSm">Sale Settings</Text>
+
+                  <Checkbox
+                    label="Allow completed orders"
+                    checked={sync.allowCompletedOrders ?? false}
+                    onChange={(value) => updateSyncConfig(syncIndex, 'allowCompletedOrders', value)}
+                  />
+                </BlockStack>
+              </Card>
+            )}
 
             {/* Inventory-specific fields */}
             {sync.entity === 'inventory' && (

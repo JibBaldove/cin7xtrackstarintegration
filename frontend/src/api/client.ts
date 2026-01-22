@@ -268,7 +268,7 @@ export class ApiClient {
     const inventoryUrl = 'https://live.fastn.ai/api/v1/clients/d0f8c7f3-69d3-403c-90a0-17c8857e095f/webhooks/sync_inventory_trackstarxcin7';
     const headers: any = {
       'x-fastn-space-tenantid': this.tenantId,
-      'x-fastn-space-connection-id': connectionId || 'default',
+      'x-fastn-space-connection-id': (connectionId && connectionId !== 'null') ? connectionId : 'default',
       'Content-Type': 'application/json'
     };
     const payload = {

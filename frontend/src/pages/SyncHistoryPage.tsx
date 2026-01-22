@@ -313,7 +313,7 @@ export function SyncHistoryPage() {
     setSuccessMessage('');
 
     try {
-      const connectionId = record.connection_id || 'default';
+      const connectionId = (record.connection_id && record.connection_id !== 'null') ? record.connection_id : 'default';
       const isPull = record.last_sync_action === 'PULL';
 
       if (isPull) {

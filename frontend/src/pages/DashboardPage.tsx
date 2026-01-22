@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Page, Tabs, Banner, Button, InlineStack, BlockStack, Spinner } from '@shopify/polaris';
+import { Page, Tabs, Banner, BlockStack, Spinner } from '@shopify/polaris';
 import { apiClient } from '../api/client';
 import { SyncConfigEditor } from '../components/SyncConfigEditor';
 import { LocationMappingEditor } from '../components/LocationMappingEditor';
+import { SchedulesEditor } from '../components/SchedulesEditor';
 import { SettingsEditor } from '../components/SettingsEditor';
-import type { TenantConfig, ConfigOptions, Connection, LocationMapping } from '../types/config';
+import type { TenantConfig, ConfigOptions, Connection, LocationMapping, ConnectionSchedules } from '../types/config';
 
 export function DashboardPage() {
   const [config, setConfig] = useState<TenantConfig | null>(null);
@@ -20,12 +21,47 @@ export function DashboardPage() {
     loadConfig();
   }, []);
 
+  const migrateSchedulesToTopLevel = useCallback((config: TenantConfig): TenantConfig => {
+    // If already migrated, return as-is
+    if (config.connectionSchedules) {
+      return config;
+    }
+
+    // Extract schedules from locationMapping
+    const connectionSchedules: ConnectionSchedules = {};
+
+    if (config.locationMapping) {
+      config.locationMapping.forEach(location => {
+        if ((location as any).entitySchedules && location.connectionId) {
+          connectionSchedules[location.connectionId] = (location as any).entitySchedules;
+        }
+      });
+    }
+
+    // Clean up locationMapping (remove entitySchedules)
+    const cleanedLocationMapping = config.locationMapping?.map(
+      ({ ...rest }: any) => {
+        const { entitySchedules, ...cleaned } = rest;
+        return cleaned;
+      }
+    ) || [];
+
+    return {
+      ...config,
+      locationMapping: cleanedLocationMapping,
+      connectionSchedules: Object.keys(connectionSchedules).length > 0 ? connectionSchedules : {}
+    };
+  }, []);
+
   const loadConfig = async () => {
     try {
       setLoading(true);
       setError('');
       const response = await apiClient.getTenantConfig();
-      const configData = response.config || response;
+      let configData = response.config || response;
+
+      configData = migrateSchedulesToTopLevel(configData);
+
       setConfig(configData);
 
       if (response.options) {
@@ -114,14 +150,19 @@ export function DashboardPage() {
 
   const tabs = [
     {
+      id: 'location',
+      content: 'Connection Settings',
+      panelID: 'location-panel',
+    },
+    {
       id: 'sync',
       content: 'Entity Settings',
       panelID: 'sync-panel',
     },
     {
-      id: 'location',
-      content: 'Connection Settings',
-      panelID: 'location-panel',
+      id: 'schedules',
+      content: 'Schedules',
+      panelID: 'schedules-panel',
     },
     {
       id: 'settings',
@@ -143,7 +184,7 @@ export function DashboardPage() {
   return (
     <Page
       title="Configuration"
-      subtitle="Manage your entity settings, connection settings, and other settings"
+      subtitle="Manage your connection settings, entity settings, schedules, and other settings"
       primaryAction={{
         content: 'Save Changes',
         onAction: handleSave,
@@ -181,23 +222,34 @@ export function DashboardPage() {
         <Tabs tabs={tabs} selected={activeTab} onSelect={setActiveTab}>
           <div style={{ paddingTop: '1rem' }}>
             {activeTab === 0 && config && (
+              <LocationMappingEditor
+                locationMapping={config.locationMapping}
+                onChange={(newLocationMapping) => setConfig({ ...config, locationMapping: newLocationMapping })}
+                cin7Warehouses={options.cin7Warehouses}
+                connections={options.connections}
+              />
+            )}
+
+            {activeTab === 1 && config && (
               <SyncConfigEditor
                 syncConfig={config.syncConfig}
                 onChange={(newSyncConfig) => setConfig({ ...config, syncConfig: newSyncConfig })}
               />
             )}
 
-            {activeTab === 1 && config && (
-              <LocationMappingEditor
-                locationMapping={config.locationMapping}
-                onChange={(newLocationMapping) => setConfig({ ...config, locationMapping: newLocationMapping })}
-                cin7Warehouses={options.cin7Warehouses}
+            {activeTab === 2 && config && (
+              <SchedulesEditor
+                connectionSchedules={config.connectionSchedules || {}}
+                onChange={(newConnectionSchedules) =>
+                  setConfig({ ...config, connectionSchedules: newConnectionSchedules })
+                }
                 connections={options.connections}
                 syncConfig={config.syncConfig}
+                locationMapping={config.locationMapping}
               />
             )}
 
-            {activeTab === 2 && config && (
+            {activeTab === 3 && config && (
               <SettingsEditor
                 apiKey={config.apiKey || ''}
                 hasApiKey={config.hasApiKey || false}
