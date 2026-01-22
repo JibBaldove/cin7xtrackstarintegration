@@ -630,17 +630,27 @@ export function SyncHistoryPage() {
                           title="Copy Cin7 ID to clipboard"
                           style={{
                             background: 'none',
-                            border: '1px solid #ddd',
-                            borderRadius: '4px',
-                            padding: '0.25rem',
+                            border: 'none',
+                            padding: '2px',
                             cursor: 'pointer',
-                            display: 'flex',
+                            display: 'inline-flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            color: copiedId === record.record_id ? '#28a745' : '#666',
+                            color: copiedId === record.record_id ? '#28a745' : '#999',
                             transition: 'all 0.2s',
-                            fontSize: '0.875rem',
-                            flexShrink: 0
+                            fontSize: '0.7rem',
+                            flexShrink: 0,
+                            verticalAlign: 'middle'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (copiedId !== record.record_id) {
+                              e.currentTarget.style.color = '#666';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (copiedId !== record.record_id) {
+                              e.currentTarget.style.color = '#999';
+                            }
                           }}
                         >
                           {copiedId === record.record_id ? '✓' : '📋'}
@@ -668,17 +678,27 @@ export function SyncHistoryPage() {
                             title={record.type === 'inventory' ? 'Copy Trackstar SKU to clipboard' : 'Copy Trackstar ID to clipboard'}
                             style={{
                               background: 'none',
-                              border: '1px solid #ddd',
-                              borderRadius: '4px',
-                              padding: '0.25rem',
+                              border: 'none',
+                              padding: '2px',
                               cursor: 'pointer',
-                              display: 'flex',
+                              display: 'inline-flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              color: copiedId === `trackstar-${record.record_id}` ? '#28a745' : '#666',
+                              color: copiedId === `trackstar-${record.record_id}` ? '#28a745' : '#999',
                               transition: 'all 0.2s',
-                              fontSize: '0.875rem',
-                              flexShrink: 0
+                              fontSize: '0.7rem',
+                              flexShrink: 0,
+                              verticalAlign: 'middle'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (copiedId !== `trackstar-${record.record_id}`) {
+                                e.currentTarget.style.color = '#666';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (copiedId !== `trackstar-${record.record_id}`) {
+                                e.currentTarget.style.color = '#999';
+                              }
                             }}
                           >
                             {copiedId === `trackstar-${record.record_id}` ? '✓' : '📋'}
@@ -748,17 +768,27 @@ export function SyncHistoryPage() {
                             title="Copy Cin7 ID to clipboard"
                             style={{
                               background: 'none',
-                              border: '1px solid #ddd',
-                              borderRadius: '4px',
-                              padding: '0.25rem',
+                              border: 'none',
+                              padding: '2px',
                               cursor: 'pointer',
-                              display: 'flex',
+                              display: 'inline-flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              color: copiedId === child.record_id ? '#28a745' : '#666',
+                              color: copiedId === child.record_id ? '#28a745' : '#999',
                               transition: 'all 0.2s',
-                              fontSize: '0.875rem',
-                              flexShrink: 0
+                              fontSize: '0.7rem',
+                              flexShrink: 0,
+                              verticalAlign: 'middle'
+                            }}
+                            onMouseEnter={(e) => {
+                              if (copiedId !== child.record_id) {
+                                e.currentTarget.style.color = '#666';
+                              }
+                            }}
+                            onMouseLeave={(e) => {
+                              if (copiedId !== child.record_id) {
+                                e.currentTarget.style.color = '#999';
+                              }
                             }}
                           >
                             {copiedId === child.record_id ? '✓' : '📋'}
@@ -786,17 +816,27 @@ export function SyncHistoryPage() {
                               title={child.type === 'inventory' ? 'Copy Trackstar SKU to clipboard' : 'Copy Trackstar ID to clipboard'}
                               style={{
                                 background: 'none',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px',
-                                padding: '0.25rem',
+                                border: 'none',
+                                padding: '2px',
                                 cursor: 'pointer',
-                                display: 'flex',
+                                display: 'inline-flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
-                                color: copiedId === `trackstar-${child.record_id}` ? '#28a745' : '#666',
+                                color: copiedId === `trackstar-${child.record_id}` ? '#28a745' : '#999',
                                 transition: 'all 0.2s',
-                                fontSize: '0.875rem',
-                                flexShrink: 0
+                                fontSize: '0.7rem',
+                                flexShrink: 0,
+                                verticalAlign: 'middle'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (copiedId !== `trackstar-${child.record_id}`) {
+                                  e.currentTarget.style.color = '#666';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (copiedId !== `trackstar-${child.record_id}`) {
+                                  e.currentTarget.style.color = '#999';
+                                }
                               }}
                             >
                               {copiedId === `trackstar-${child.record_id}` ? '✓' : '📋'}
