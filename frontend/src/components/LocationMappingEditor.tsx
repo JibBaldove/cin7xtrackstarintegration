@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Card, TextField, Button, Banner, BlockStack, InlineStack, Text, Divider, Select } from '@shopify/polaris';
+import { Card, TextField, Button, Banner, BlockStack, InlineStack, Text, Divider } from '@shopify/polaris';
 import type { LocationMapping, SubstitutionList, Cin7Warehouse, Connection } from '../types/config';
 import { SearchableSelect } from './SearchableSelect';
 
@@ -333,19 +333,26 @@ export function LocationMappingEditor({
               {selectedConnection && selectedConnection.shippingMethods && selectedConnection.shippingMethods.length > 0 && (
                 <>
                   <Divider />
-                  <Select
-                    label="Default 3PL Shipping Method"
-                    options={[
-                      { label: 'None', value: '' },
-                      ...selectedConnection.shippingMethods.map(method => ({
-                        label: `${method.name} - ${method.carrier_name} (ID: ${method.id})`,
-                        value: method.id
-                      }))
-                    ]}
-                    value={location.default3PLShippingMethod || ''}
-                    onChange={(value) => updateLocationMapping(locationIndex, 'default3PLShippingMethod', value)}
-                    helpText="Select the default 3PL shipping method for this connection"
-                  />
+                  <BlockStack gap="200">
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: '500' }}>
+                      Default 3PL Shipping Method
+                    </label>
+                    <SearchableSelect
+                      options={[
+                        { id: '', name: 'None' },
+                        ...selectedConnection.shippingMethods.map(method => ({
+                          id: method.id,
+                          name: `${method.name} - ${method.carrier_name} (ID: ${method.id})`
+                        }))
+                      ]}
+                      value={location.default3PLShippingMethod || ''}
+                      onChange={(value) => updateLocationMapping(locationIndex, 'default3PLShippingMethod', value)}
+                      placeholder="Search by method or carrier name..."
+                    />
+                    <Text as="p" variant="bodySm" tone="subdued">
+                      Select the default 3PL shipping method for this connection
+                    </Text>
+                  </BlockStack>
                 </>
               )}
 
