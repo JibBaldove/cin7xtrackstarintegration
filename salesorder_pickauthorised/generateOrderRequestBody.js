@@ -222,8 +222,13 @@ function handler(params) {
           if (hasShippingMethodName) {
             shippingMethodFields.shipping_method_name = shippingMethodNameValue || "N/A";
           }
-          if (hasShippingMethodId && shippingMethodIdValue) {
-            shippingMethodFields.shipping_method_id = shippingMethodIdValue;
+          if (hasShippingMethodId) {
+            if (shippingMethodIdValue) {
+              shippingMethodFields.shipping_method_id = shippingMethodIdValue;
+            } else if (carrierValue && carrierValue !== "N/A") {
+              // Fallback: use carrier name as ID when no ID is available
+              shippingMethodFields.shipping_method_id = carrierValue;
+            }
           }
           if (hasShippingMethod && !hasShippingMethodName && !hasShippingMethodId) {
             shippingMethodFields.shipping_method = shippingMethodNameValue || "N/A";
