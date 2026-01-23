@@ -222,16 +222,21 @@ function handler(params) {
           if (hasShippingMethodName) {
             shippingMethodFields.shipping_method_name = shippingMethodNameValue || "N/A";
           }
-          if (hasShippingMethodId) {
-            if (shippingMethodIdValue) {
-              shippingMethodFields.shipping_method_id = shippingMethodIdValue;
-            } else if (carrierValue && carrierValue !== "N/A") {
-              // Fallback: use carrier name as ID when no ID is available
-              shippingMethodFields.shipping_method_id = carrierValue;
-            }
+          if (hasShippingMethodId && shippingMethodIdValue) {
+            shippingMethodFields.shipping_method_id = shippingMethodIdValue;
           }
-          if (hasShippingMethod && !hasShippingMethodName && !hasShippingMethodId) {
-            shippingMethodFields.shipping_method = shippingMethodNameValue || "N/A";
+          // Always populate shipping_method when it exists in schema, use Carrier as fallback
+          if (hasShippingMethod) {
+            if (!hasShippingMethodName && !hasShippingMethodId) {
+              // Not deprecated - use normal value or fallback
+              shippingMethodFields.shipping_method = shippingMethodNameValue || "N/A";
+            } else if (shippingMethodNameValue && shippingMethodNameValue !== "N/A") {
+              // Deprecated but has value - include it
+              shippingMethodFields.shipping_method = shippingMethodNameValue;
+            } else if (carrierValue && carrierValue !== "N/A") {
+              // Fallback: use carrier value when no shipping method value available
+              shippingMethodFields.shipping_method = carrierValue;
+            }
           }
 
           // Get current fulfillment from loop
