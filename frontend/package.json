@@ -9,7 +9,15 @@
     "lint": "eslint .",
     "preview": "vite preview"
   },
+  "overrides": {
+    "@fastn-ai/widget-react": {
+      "react": "$react",
+      "react-dom": "$react-dom"
+    }
+  },
   "dependencies": {
+    "@fastn-ai/react-core": "^1.0.13",
+    "@fastn-ai/widget-react": "^1.0.5",
     "@shopify/polaris": "^13.9.5",
     "@shopify/polaris-icons": "^9.3.1",
     "@tanstack/react-query": "^5.90.12",

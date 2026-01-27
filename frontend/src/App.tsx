@@ -6,6 +6,7 @@ import { AuthProvider } from './contexts/AuthContext';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { SyncHistoryPage } from './pages/SyncHistoryPage';
+import { MyTenantPage } from './pages/MyTenantPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Layout } from './components/Layout';
 
@@ -35,6 +36,16 @@ function App() {
                   <ProtectedRoute>
                     <Layout>
                       <SyncHistoryPage />
+                    </Layout>
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-tenant"
+                element={
+                  <ProtectedRoute>
+                    <Layout>
+                      <MyTenantPage />
                     </Layout>
                   </ProtectedRoute>
                 }

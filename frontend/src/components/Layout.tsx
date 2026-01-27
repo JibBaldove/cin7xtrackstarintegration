@@ -26,8 +26,6 @@ export function Layout({ children }: Props) {
 
   const logo = {
     width: 124,
-    topBarSource: undefined,
-    contextualSaveBarSource: undefined,
     url: '#',
     accessibilityLabel: 'Cin7 × Trackstar',
   };
@@ -56,24 +54,43 @@ export function Layout({ children }: Props) {
   );
 
   const navigationMarkup = (
-    <Navigation location={location.pathname}>
-      <Navigation.Section
-        items={[
-          {
-            url: '/dashboard',
-            label: 'Configuration',
-            selected: location.pathname === '/dashboard',
-            onClick: () => navigate('/dashboard'),
-          },
-          {
-            url: '/sync-history',
-            label: 'Sync History',
-            selected: location.pathname === '/sync-history',
-            onClick: () => navigate('/sync-history'),
-          },
-        ]}
-      />
-    </Navigation>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ flex: 1 }}>
+        <Navigation location={location.pathname}>
+          <Navigation.Section
+            items={[
+              {
+                url: '/dashboard',
+                label: 'Configuration',
+                selected: location.pathname === '/dashboard',
+                onClick: () => navigate('/dashboard'),
+              },
+              {
+                url: '/sync-history',
+                label: 'Sync History',
+                selected: location.pathname === '/sync-history',
+                onClick: () => navigate('/sync-history'),
+              },
+            ]}
+          />
+        </Navigation>
+      </div>
+      <div>
+        <Navigation location={location.pathname}>
+          <Navigation.Section
+            items={[
+              {
+                url: '/my-tenant',
+                label: 'My Tenant',
+                selected: location.pathname === '/my-tenant',
+                onClick: () => navigate('/my-tenant'),
+              },
+            ]}
+            separator
+          />
+        </Navigation>
+      </div>
+    </div>
   );
 
   return (
