@@ -15,20 +15,14 @@
       return { error: `Location ${locationName} not found in LocationList` };                                                 
     }                                                                                                                         
                                                                                                                               
-    // Extract lines and enrich with LocationId and LocationName                                                              
-    const enrichedLines = inventoryAdjustment.Lines.map((line) => ({                                                          
-      LocationId: matchingLocation.ID,                                                                                        
-      LocationName: matchingLocation.Name,                                                                                    
-      SKU: line.SKU,                                                                                                          
-      ProductName: line.ProductName,                                                                                          
-      Quantity: line.Quantity,                                                                                                
-      UnitCost: line.UnitCost,                                                                                                
-      ProductLength: line.ProductLength,                                                                                      
-      ProductWidth: line.ProductWidth,                                                                                        
-      ProductHeight: line.ProductHeight,                                                                                      
-      ProductWeight: line.ProductWeight,                                                                                      
-      ...(line.BatchSN ? { BatchSN: line.BatchSN } : {}),                                                                     
-      ...(line.ExpiryDate ? { ExpiryDate: line.ExpiryDate } : {})                                                             
+    // Extract lines and enrich with only valid API fields for stock adjustment
+    const enrichedLines = inventoryAdjustment.Lines.map((line) => ({
+      LocationId: matchingLocation.ID,
+      SKU: line.SKU,
+      Quantity: line.Quantity,
+      UnitCost: line.UnitCost,
+      ...(inventoryAdjustment.lot_id ? { BatchSN: inventoryAdjustment.lot_id } : {}),
+      ...(inventoryAdjustment.expiration_date ? { ExpiryDate: inventoryAdjustment.expiration_date } : {})
     }));                                                                                                                      
                                                                                                                               
     return enrichedLines;                                                                                                     

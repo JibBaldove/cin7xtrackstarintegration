@@ -219,7 +219,7 @@
             locationName: warehouse.id,
             warehouseId: lot.warehouse_id,
             lot_id: lot.lot_id,
-            expiration_date: lot.expiration_date,
+            expiration_date: lot.expiration_date || '9999-12-31',
             Lines: [{
               SKU: trackstarInventory.sku,
               ProductName: trackstarInventory.name,
@@ -247,7 +247,11 @@
           lottedByWarehouse[lot.warehouse_id] += (lot.onhand || 0);
         }
 
-        // Add non-lotted inventory per warehouse (without lot_id)
+        // Add non-lotted inventory per warehouse with default lot_id
+        // Non-FIFO products require batch tracking, so use default lot for non-lotted inventory
+        const defaultLotId = 'UNLOTTED';
+        const defaultExpirationDate = '9999-12-31';
+
         if (locationScope === 'all') {
           const warehouse = warehouses[0];
           const totalOnhand = trackstarInventory[quantityType] || 0;
@@ -258,6 +262,9 @@
             const result = {
               locationName: warehouse.id,
               warehouseId: warehouse.warehouseId,
+              lot_id: defaultLotId,
+              expiration_date: defaultExpirationDate,
+              note: 'Default lot assigned for non-lotted inventory - Cin7 product requires Batch/Serial tracking',
               Lines: [{
                 SKU: trackstarInventory.sku,
                 ProductName: trackstarInventory.name,
@@ -287,6 +294,9 @@
               const result = {
                 locationName: warehouse.id,
                 warehouseId: warehouse.warehouseId,
+                lot_id: defaultLotId,
+                expiration_date: defaultExpirationDate,
+                note: 'Default lot assigned for non-lotted inventory - Cin7 product requires Batch/Serial tracking',
                 Lines: [{
                   SKU: trackstarInventory.sku,
                   ProductName: trackstarInventory.name,
