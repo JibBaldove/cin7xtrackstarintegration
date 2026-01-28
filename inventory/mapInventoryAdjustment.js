@@ -53,7 +53,7 @@
     }
 
     // Validate product type - only Stock items can have inventory adjustments
-    if (matchedProduct.Type !== 'Stock') {
+    if (matchedProduct.Type && matchedProduct.Type.toUpperCase() !== 'STOCK') {
       return {
         error: `Inventory adjustment is not applicable to non-stock items. Product ${trackstarInventory.sku} is of type: ${matchedProduct.Type}`,
         cin7Id: matchedProduct.ID,

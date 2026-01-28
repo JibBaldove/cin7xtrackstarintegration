@@ -221,6 +221,12 @@ export function SyncHistoryPage() {
       let aValue: any = a[sortField];
       let bValue: any = b[sortField];
 
+      // For date sorting, use the appropriate date field based on action
+      if (sortField === 'last_pushed_date') {
+        aValue = a.last_sync_action === 'PULL' ? a.last_pulled_date : a.last_pushed_date;
+        bValue = b.last_sync_action === 'PULL' ? b.last_pulled_date : b.last_pushed_date;
+      }
+
       // Handle null/undefined values
       if (aValue === null || aValue === undefined) aValue = '';
       if (bValue === null || bValue === undefined) bValue = '';
@@ -731,7 +737,7 @@ export function SyncHistoryPage() {
                       </div>
                     </td>
                     <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>
-                      {formatDate(record.last_pushed_date)}
+                      {formatDate(record.last_sync_action === 'PULL' ? record.last_pulled_date : record.last_pushed_date)}
                     </td>
                     <td style={{ padding: '0.75rem' }}>
                       <Button
@@ -869,7 +875,7 @@ export function SyncHistoryPage() {
                         </div>
                       </td>
                       <td style={{ padding: '0.75rem', fontSize: '0.8rem' }}>
-                        {formatDate(child.last_pushed_date)}
+                        {formatDate(child.last_sync_action === 'PULL' ? child.last_pulled_date : child.last_pushed_date)}
                       </td>
                       <td style={{ padding: '0.75rem' }}>
                         <Button

@@ -2,7 +2,6 @@ function handler(params) {
       let cin7Transfer = params.data?.steps.getStockTransfer.output || {};
       const schemaData = params.data?.steps?.flattenSchemaForCreateInbound?.output?.schema || {};
       const warehouse_id = params.data.var.mappedWarehouse;
-      const integrationType = "transfer";
       const hasInventoryFields = params.data.steps.flattenSchemaForCreateInbound.output.hasInventoryFields;
 
       // Helper function to ensure datetime has timezone
@@ -14,6 +13,17 @@ function handler(params) {
           }
           // Append 'Z' for UTC timezone
           return datetime + 'Z';
+      };
+
+      // Helper function to generate transfer lot ID from date
+      const generateTransferLotId = (datetime) => {
+          if (!datetime) return null;
+          // Parse the datetime and format as TR-YYYY-MM-DD
+          const date = new Date(datetime);
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `TR-${year}-${month}-${day}`;
       };
 
       // Get inventory items if hasInventoryFields is true (for inventory_item_id lookup only)
@@ -35,8 +45,9 @@ function handler(params) {
           return inventoryItemsMap[sku].id || "";
       };
 
-      // Determine which Lines array to use based on SkipOrder
-      const lines = (cin7Transfer.SkipOrder ? cin7Transfer.Lines : cin7Transfer.Order?.Lines) || [];
+      // Use cin7Transfer.Lines which contains BatchSN and ExpiryDate information
+      // Note: cin7Transfer.Order.Lines does not include batch/expiry data
+      const lines = cin7Transfer.Lines || [];
 
       // Build source data from Cin7 Stock Transfer
       const sourceData = {
@@ -63,11 +74,10 @@ function handler(params) {
                   expected_quantity: line.TransferQuantity || 0
               };
 
-              // Only add lot info if BOTH conditions are met:
-              // 1. Schema has inventory fields (hasInventoryFields)
-              // 2. Cin7 item has batch information (line.BatchSN)
-              if (hasInventoryFields && line.BatchSN) {
-                  lineItem.lot_id = line.BatchSN;
+              // Add lot info if schema has inventory fields
+              if (hasInventoryFields) {
+                  // Use BatchSN if available, otherwise generate from transfer date
+                  lineItem.lot_id = line.BatchSN || generateTransferLotId(cin7Transfer.DepartureDate || cin7Transfer.RequiredByDate);
                   lineItem.inventory_item_id = getInventoryItemId(line.SKU);
                   if (line.ExpiryDate) {
                       lineItem.lot_expiration_date = ensureTimezone(line.ExpiryDate);
@@ -76,7 +86,7 @@ function handler(params) {
 
               return {
                   line_items: [lineItem],
-                  tracking_number: line.TrackingNumber || "XXX-XXXXX-XXXX" // Default if no tracking number
+                  tracking_number: line.TrackingNumber || "NO-TRACKING-NUMBER" // Default if no tracking number
               };
           })
       };
